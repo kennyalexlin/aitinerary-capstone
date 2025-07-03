@@ -1,0 +1,22 @@
+[project]
+name = "aitenerary"
+version = "0.1.0"
+description = "A chat-based API for collecting flight booking information"
+authors = [
+    {name = "Michelle Liu",email = "m.liu@berkeley.edu"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+package-mode = false
+dependencies = [
+    "fastapi>=0.104.1",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "streamlit>=1.28.0",
+    "requests>=2.31.0",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
