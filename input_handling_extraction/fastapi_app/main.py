@@ -27,20 +27,40 @@ class FlightInfo(BaseModel):
     arrival_city: str
     departure_date: str
     return_date: Optional[str] = None
-    passengers: int = 1
+    adult_passengers: int = 1
+    child_passengers: Optional[int] = None
+    infant_passengers: Optional[int] = None
     cabin_class: Optional[str] = None
     budget: Optional[float] = None
     round_trip: bool = True
     flexible_dates: Optional[bool] = False
+    routing: Optional[str] = None
+    points_booking : Optional[bool] = False
+    refundable : Optional[bool] = False
+    redress_number: Optional[int] = None
 
 class UserInfo(BaseModel):
     first_name: str
     last_name: str
+    name_suffix: Optional[str] = None
     email: str
     phone_number: Optional[str] = None 
     date_of_birth: Optional[str] = None
+    gender: str
+    country: None
     home_address: Optional[str] = None
     passport_number: Optional[str] = None
+
+class UserBillingInfo(BaseModel):
+    name_on_card: str
+    card_number: int
+    expiration_date: int
+    cvv: int
+    billing_address: str
+    city: str
+    state_province: str
+    zip_code: int
+    country_region: str
 
 class UserPreferences(BaseModel):
     preferred_airlines: Optional[List[str]] = None
