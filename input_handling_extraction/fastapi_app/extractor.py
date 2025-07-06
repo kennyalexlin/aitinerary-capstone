@@ -4,7 +4,7 @@ import re
 from typing import List, Dict, Optional
 
 # DeepSeek API configuration
-DEEPSEEK_API_KEY = "sk-62497041b697410a9df5f50e738e409d"
+DEEPSEEK_API_KEY = "ADDED_TO_GITIGNORE"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 
 def extract_flight_info_from_message(user_message: str) -> dict:
