@@ -1,5 +1,5 @@
 [project]
-name = "aitenerary"
+name = "input_handling"
 version = "0.1.0"
 description = "A chat-based API for collecting flight booking information"
 authors = [
@@ -8,12 +8,13 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 package-mode = false
+
 dependencies = [
     "fastapi>=0.104.1",
     "uvicorn[standard]>=0.24.0",
     "pydantic>=2.5.0",
     "streamlit>=1.28.0",
-    "requests>=2.31.0",
+    "requests>=2.31.0"
 ]
 
 

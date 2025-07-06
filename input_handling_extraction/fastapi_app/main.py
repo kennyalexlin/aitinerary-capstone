@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 import json
+import requests
+from .extractor import extract_flight_info_from_message, update_flight_info
 
 # initialize FastAPI app
 app = FastAPI(
@@ -20,6 +22,12 @@ app = FastAPI(
 #     allow_methods=["*"],
 #     allow_headers=["*"],
 # )
+
+# DeepSeek API configuration
+DEEPSEEK_API_KEY = "ADDED_TO_GITIGNORE"  
+DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
+
+print("DeepSeek API configured!")
 
 # data models
 class FlightInfo(BaseModel):
@@ -81,12 +89,19 @@ class ChatSession(BaseModel):
     user_info: Optional[UserInfo] = None
     user_preferences: Optional[UserPreferences] = None
 
+class ChatRequest(BaseModel):
+    role: str
+    content: str
+    session_id: Optional[str] = None
+
 # in-memory storage (replace with database in production)
 chat_sessions = {}
 
 def generate_session_id() -> str:
     """generate a unique session ID"""
     return f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{len(chat_sessions)}"
+
+
 
 # API Endpoints
 @app.get("/")
@@ -104,17 +119,124 @@ def health_check():
     }
 
 @app.post("/chat")
-def chat(message: ChatMessage):
-    """handle chat messages and return llm response"""
-    # for now, just return a simple response
-    response = "hello! what are you thinking for your flight?"
+def chat(request: ChatRequest):
+    """handle chat messages and return llm response with extracted flight info"""
+    
+    # initialize or get session
+    session_id = request.session_id
+    if not session_id:
+        session_id = generate_session_id()
+    
+    print(f"Processing chat for session: {session_id}")
+    
+    if session_id not in chat_sessions:
+        chat_sessions[session_id] = {
+            "messages": [],
+            "flight_info": {},
+            "user_info": {},
+            "user_preferences": {}
+        }
+        print(f"Created new session: {session_id}")
+    else:
+        print(f"Using existing session: {session_id}")
+        print(f"Current flight info: {chat_sessions[session_id]['flight_info']}")
+    
+    # add user message to session
+    chat_sessions[session_id]["messages"].append({
+        "role": "user",
+        "content": request.content,
+        "timestamp": datetime.now().isoformat()
+    })
+    
+    try:
+        # prepare the request payload for DeepSeek API
+        headers = {
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        # add context about being a flight booking assistant
+        system_prompt = "You are a helpful flight booking assistant. Help users book flights by collecting their travel preferences in a conversational way. Be friendly and professional."
+        
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": request.content}
+            ],
+            "max_tokens": 150,
+            "temperature": 0.7
+        }
+        
+        # make API request to DeepSeek
+        response = requests.post(DEEPSEEK_BASE_URL, headers=headers, json=payload)
+        response.raise_for_status()
+        
+        # extract the response text
+        result = response.json()
+        ai_response = result['choices'][0]['message']['content']
+        
+        # Add AI response to session
+        chat_sessions[session_id]["messages"].append({
+            "role": "assistant",
+            "content": ai_response,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        # extract flight information from the current user message
+        extracted_flight_info = extract_flight_info_from_message(request.content)
+        print(f"Extracted flight info: {extracted_flight_info}")
+        
+        # update session flight info
+        chat_sessions[session_id]["flight_info"] = update_flight_info(
+            chat_sessions[session_id]["flight_info"], 
+            extracted_flight_info
+        )
+        print(f"Updated flight info: {chat_sessions[session_id]['flight_info']}")
+        
+        # if response is empty, provide a fallback
+        if not ai_response.strip():
+            ai_response = "response is empty - troubleshooting"
+            
+    except Exception as e:
+        print(f"Error generating response: {e}")
+        ai_response = "I'm having trouble processing your request. Please try again."
     
     return {
-        "response": response,
-        "session_id": None,  # add session management later
-        "flight_info": None,
-        "user_info": None,
-        "user_preferences": None
+        "response": ai_response,
+        "session_id": session_id,
+        "flight_info": chat_sessions[session_id]["flight_info"],
+        "user_info": chat_sessions[session_id]["user_info"],
+        "user_preferences": chat_sessions[session_id]["user_preferences"]
+    }
+
+@app.get("/session/{session_id}")
+def get_session_info(session_id: str):
+    """get session information including extracted flight data"""
+    if session_id not in chat_sessions:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    session = chat_sessions[session_id]
+    return {
+        "session_id": session_id,
+        "messages": session["messages"],
+        "flight_info": session["flight_info"],
+        "user_info": session["user_info"],
+        "user_preferences": session["user_preferences"]
+    }
+
+@app.get("/sessions")
+def list_sessions():
+    """list all active sessions"""
+    return {
+        "sessions": [
+            {
+                "session_id": session_id,
+                "message_count": len(session["messages"]),
+                "flight_info": session["flight_info"]
+            }
+            for session_id, session in chat_sessions.items()
+        ]
     }
 
 if __name__ == "__main__":

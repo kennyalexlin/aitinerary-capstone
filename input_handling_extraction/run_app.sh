@@ -20,7 +20,7 @@ sleep 3
 
 # Open browsers
 echo "🌐 Opening browsers..."
-open http://localhost:8501  # streamlit frontend
+# open http://localhost:8501  # streamlit frontend
 open http://localhost:8000/docs  # FastAPI docs
 
 echo ""
