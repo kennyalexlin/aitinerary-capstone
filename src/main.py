@@ -22,8 +22,6 @@ task1_logs_path = os.path.join(LOGS_PATH, run_id, "task1")
 task2_logs_path = os.path.join(LOGS_PATH, run_id, "task2")
 task3_logs_path = os.path.join(LOGS_PATH, run_id, "task3")
 
-recording_path = os.path.join(LOGS_PATH, "recording")
-
 intent = {
     "from": "SNA",
     "to": "SFO",
@@ -98,7 +96,6 @@ async def main():
         # message_context=,
         browser_session=browser_session,
         save_conversation_path=task1_logs_path,
-        # save_recording_path=recording_path,
         use_vision=True,
     )
     result = await agent.run()
