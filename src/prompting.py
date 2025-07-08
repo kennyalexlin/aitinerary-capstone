@@ -1,14 +1,17 @@
-def get_initial_actions(site="delta"):
+def get_initial_actions(site: str):
     """Returns a list of initial actions for the agent to take"""
     actions = []
     if site == "delta":
         actions.append(
             {"go_to_url": {"url": "https://www.delta.com", "new_tab": False}}
         )
-    if site == "united":
+    elif site == "united":
         actions.append(
             {"go_to_url": {"url": "https://www.united.com", "new_tab": False}}
         )
+    else:
+        actions.append({"go_to_url": {"url": site, "new_tab": False}})
+
     return actions
 
 
@@ -54,15 +57,17 @@ Once this occurs, you are done.
 """
     else:
         task2 = f"""
-You are booking a one-way flight from {intent["from"]} to {intent["to"]}.
-Select the cheapest departing flight, regardless of restrictions.
-Continue with the airline booking process until you are prompted to provide any traveler info.
+You are booking a one-way flight from {intent["from"]} to {intent["to"]}. You are currently on a list of flights with different prices and characteristics.
+Scroll through the list and identify the cheapest departing flight, regardless of restrictions.
+Select that flight and continue with the booking process until you are prompted to provide any traveler info.
 Once this occurs, you are done.
 """
 
     task3 = f"""
 You are booking a one-way flight from {intent["from"]} to {intent["to"]}.
 Populate any passenger information using the information provided below. If there is more than one passenger, treat Passenger #1 as the primary contact for any booking or confirmation details.
+
+If there are form elements that are not visible in the viewport, use the scroll action. You must only scroll in half-page increments (num_pages = 0.5)
 
 Continue with the airline booking process until you are prompted to provide any payment info.
 Once this occurs, you are done.

@@ -1,9 +1,9 @@
+import logging
 import shutil
 from pathlib import Path
 
 import screeninfo
 from browser_use import BrowserSession
-import logging
 
 
 def clear_browseruse_cache():
@@ -45,14 +45,16 @@ def create_fresh_browser_session(
     position_width = 0
     position_height = 0
 
-    if window_orientation == 'top-left':
+    if window_orientation == "top-left":
         pass
     elif window_orientation == "top-right":
         screen_width, screen_height = get_screen_dimensions()
         position_width = screen_width - window_width
         position_height = 0
     else:
-        logging.warning(f"window_orientation {window_orientation} is not supported. Valid values are 'top-left' or 'top-right'")
+        logging.warning(
+            f"window_orientation {window_orientation} is not supported. Valid values are 'top-left' or 'top-right'"
+        )
 
     # Configure browser session with maximum freshness
     browser_session = BrowserSession(

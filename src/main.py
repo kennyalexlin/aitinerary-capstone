@@ -48,19 +48,12 @@ primary_llm = ChatGoogle(model="gemini-2.0-flash", temperature=0.0)
 planner_llm = ChatGoogle(model="gemini-2.0-flash", temperature=0.0)
 browser_session = create_fresh_browser_session(window_orientation="top-right")
 task1, task2, task3 = get_tasks(intent=intent)
-initial_actions = get_initial_actions(site="united")
 
 controller = Controller()
 
 
 @controller.action("Click and clear text in a selected text input element")
 async def clear_text(index: int, browser_session: BrowserSession) -> ActionResult:
-    """Defines a new action for the Agent that enables it to clear an input element
-    without needing to hit backspace multiple times
-
-    This additionally solves the problem of the agent clicking into the middle of a text element,
-    which was happening frequently on the United site.
-    """
     element_node = await browser_session.get_dom_element_by_index(index)
     element_handle = await browser_session.get_locate_element(element_node)
 
@@ -73,11 +66,28 @@ async def clear_text(index: int, browser_session: BrowserSession) -> ActionResul
     return ActionResult(extracted_content=f"Cleared text in text input element {index}")
 
 
-# extended_planner_system_message = """
-# If any of your next steps involve populating a text input interactive element, you must include a step before it to delete any pre-populated text by selecting the input element, sending the keys Meta+A, and then sending the Backspace key.
+# failed attempt at getting the browser to zoom out to show more elements.
+# Chromium disables zooming out via hot-key :(
+# @controller.action("Zoom the page out")
+# async def zoom_out(browser_session: BrowserSession) -> ActionResult:
+#     page = await browser_session.get_current_page()
+#     session = await browser_session.browser_context.new_cdp_session(page)
+#     await session.send("Emulation.setPageScaleFactor", {"pageScaleFactor": 0.5})
+#     await page.reload()
+#     return ActionResult(extracted_content="Zoomed out to 75% scale.")
 
-# In addition, if any of your next steps involve submitting a form, you must include a step before it to double-check that all fields have been populated correctly. Do not assume that all prior steps have accomplished their tasks successfully.
-# """
+
+# testing_url = "https://www.united.com/en/us/fsr/choose-flights?f=SNA&t=SFO&d=2025-08-12&tt=1&sc=7&px=1&taxng=1&newHP=True&clm=7&st=bestmatches&tqp=R"
+
+extended_system_message = """
+<critical_rules>
+You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
+
+The following are CRITICAL rules that must always be followed:
+1. Whenever you use the "scroll" action, you must only scroll in half-page increments (num_pages = 0.25). Scrolling a full page or more will lead to unstable results.
+2. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
+</critical_rules>
+"""
 
 
 async def main():
@@ -91,7 +101,7 @@ async def main():
         llm=primary_llm,
         planner_llm=planner_llm,
         max_actions_per_step=30,
-        initial_actions=initial_actions,
+        initial_actions=get_initial_actions(site="united"),
         # message_context isn't being used at all so no point in passing that arg in
         # message_context=,
         browser_session=browser_session,
@@ -109,6 +119,8 @@ async def main():
         browser_session=browser_session,
         save_conversation_path=task2_logs_path,
         use_vision=True,
+        extend_system_message=extended_system_message,
+        # initial_actions=get_initial_actions(site=testing_url),
     )
     result = await agent.run()
 
@@ -121,6 +133,8 @@ async def main():
         browser_session=browser_session,
         save_conversation_path=task3_logs_path,
         use_vision=True,
+        extend_system_message=extended_system_message,
+        initial_actions=get_initial_actions(),
     )
     result = await agent.run()
 
