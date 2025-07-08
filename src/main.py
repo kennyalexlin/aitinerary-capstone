@@ -40,7 +40,6 @@ intent = {
 }
 
 primary_llm = ChatGoogle(model="gemini-2.0-flash", temperature=0.0)
-# primary_llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
 planner_llm = ChatGoogle(model="gemini-2.0-flash", temperature=0.0)
 browser_session = create_fresh_browser_session()
 task1, task2, task3 = get_tasks(intent=intent)
@@ -51,6 +50,12 @@ controller = Controller()
 
 @controller.action("Click and clear text in a selected text input element")
 async def clear_text(index: int, browser_session: BrowserSession) -> ActionResult:
+    """ Defines a new action for the Agent that enables it to clear an input element
+    without needing to hit backspace multiple times
+
+    This additionally solves the problem of the agent clicking into the middle of a text element,
+    which was happening frequently on the United site.
+    """
     element_node = await browser_session.get_dom_element_by_index(index)
     element_handle = await browser_session.get_locate_element(element_node)
 
@@ -60,7 +65,7 @@ async def clear_text(index: int, browser_session: BrowserSession) -> ActionResul
     page = await browser_session.get_current_page()
     await page.keyboard.press("Meta+A" if sys.platform == "darwin" else "Control+A")
     await page.keyboard.press("Backspace")
-    return ActionResult("Cleared text in text input element")
+    return ActionResult(extracted_content=f"Cleared text in text input element {index}")
 
 
 # extended_planner_system_message = """
