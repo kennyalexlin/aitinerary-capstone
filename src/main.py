@@ -51,8 +51,7 @@ task1, task2, task3 = get_tasks(intent=intent)
 
 controller = Controller()
 
-
-@controller.action("Click and clear text in a selected text input element")
+@controller.action("Click and clear text in a text input element")
 async def clear_text(index: int, browser_session: BrowserSession) -> ActionResult:
     element_node = await browser_session.get_dom_element_by_index(index)
     element_handle = await browser_session.get_locate_element(element_node)
@@ -64,6 +63,10 @@ async def clear_text(index: int, browser_session: BrowserSession) -> ActionResul
     await page.keyboard.press("Meta+A" if sys.platform == "darwin" else "Control+A")
     await page.keyboard.press("Backspace")
     return ActionResult(extracted_content=f"Cleared text in text input element {index}")
+
+
+# @controller.action("Click and fill specific traveler information into a text input element")
+# async def fill_traveler_info(element_index: int, traveler_index: int, traveler_field: str, browser_session: BrowserSession) -> ActionResult:
 
 
 # failed attempt at getting the browser to zoom out to show more elements.
