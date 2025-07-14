@@ -15,8 +15,9 @@ def get_initial_actions(site: str):
     return actions
 
 
-# TODO: implement
-def get_tasks(intent: dict) -> str:
+def get_tasks(flight_info: dict, user_info_ls: list[dict]) -> list[str]:
+    # TODO: update type hints to validate using pydantic model once we've merged the input team branch
+    # into this branch
     """
     Generates a user task based on a prompt template
     and task parameters
@@ -24,81 +25,65 @@ def get_tasks(intent: dict) -> str:
     Returns
         A string representing the formatted user task to be passed to the agent
     """
-    if intent["flight_type"] == "round-trip":
-        task1 = f"""
-Search for {intent["flight_type"]} flights from {intent["from"]} to {intent["to"]}.
-- Departure Date: {intent["departure_date"]}
-- Return Date: {intent["return_date"]}
-- Number of Passengers: {intent["num_passengers"]}
+
+    assert flight_info["adult_passengers"] == len(user_info_ls), (
+        f"flight_info['adult_passengers'] is {flight_info['adult_passengers']} but user_info only contains {len(user_info_ls)} users."
+    )
+
+    # map routing to natural language description
+    routing_mapping = {
+        "direct": "Nonstop Flights Only",
+        "one_stop": "Nonstop or One-Stop Flights Only",
+        "any": "Nonstop or Multi-Stop Flights Allowed",
+    }
+    flight_type = "round-trip" if flight_info["round_trip"] else "one-way"
+
+    def fmt_user_info(user_info: dict) -> str:
+        """formats a UserInfo object for use by the agent"""
+
+        ret = ""
+        for key, value in user_info.items():
+            ret += f"- {key.replace('_', ' ').title()}: {value}\n"
+        return ret
+
+    task1 = f"""
+Your goal is to search for {flight_type} flights from {flight_info["departure_code"]} to {flight_info["arrival_code"]}.
+You should only search for flights that match the following criteria:
+- Departure Date: {flight_info["departure_date"]}"""
+    if flight_info["round_trip"]:
+        task1 += f"\n- Return Date {flight_info['return_date']}"
+    task1 += f"""
+- Return Date: {flight_info["return_date"]}
+- Number of Passengers: {flight_info["adult_passengers"]}
+- Routing Type: {routing_mapping[flight_info["routing"]]}
+- Cabin Class: {flight_info["cabin_class"]} Only
 
 Some input fields may be pre-populated. Make sure to clear them before you type into them.
 Make sure to double check that the departure and return dates are selected correctly before proceeding.
 
 Once you are presented with a list of flights, you are done.
 """
-    else:
-        task1 = f"""
-Search for {intent["flight_type"]} flights from {intent["from"]} to {intent["to"]}.
-- Departure Date: {intent["departure_date"]}
-- Number of Passengers: {intent["num_passengers"]}
+    task2 = f"""
+You are booking a {flight_type} flight from {flight_info["departure_code"]} to {flight_info["arrival_code"]}. You are currently on the page to select a flight.
+Your goal is to select the cheapest departing flight, regardless of restrictions and continue with the flight booking process until you reach a page requesting traveler personal info (e.g. First Name, Last Name, Birthday).
 
-Some input fields may be pre-populated. Make sure to clear them before you type into them.
-Make sure to double check that the departure and return dates are selected correctly before proceeding.
-
-Once you are presented with a list of flights, you are done.
-"""
-
-    if intent["flight_type"] == "round-trip":
-        task2 = f"""
-You are booking a round-trip flight from {intent["from"]} to {intent["to"]}.
-Select the cheapest departing flight and returning flight, regardless of restrictions.
-Continue with the airline booking process until you are prompted to provide any traveler info.
-Once this occurs, you are done.
-"""
-    else:
-        task2 = f"""
-You are booking a one-way flight from {intent["from"]} to {intent["to"]}. You are currently on a list of flights with different prices and characteristics.
-Scroll through the list and identify the cheapest departing flight, regardless of restrictions.
-Select that flight and continue with the booking process until you are prompted to provide any traveler info.
-Once this occurs, you are done.
+Once you reached this page, you are done.
 """
 
     task3 = f"""
-You are booking a one-way flight from {intent["from"]} to {intent["to"]}.
-Populate any passenger information using the information provided below. If there is more than one passenger, treat Passenger #1 as the primary contact for any booking or confirmation details.
+You are booking a {flight_type} flight from {flight_info["departure_code"]} to {flight_info["arrival_code"]}. You are currently on the page to provide traveler information to the airline.
+Your goal is to accurately populate and submit the form using the passenger information provided below.
 
-If there are form elements that are not visible in the viewport, use the scroll action. You must only scroll in half-page increments (num_pages = 0.5)
+You may need to expand some page elements in order to access all form elements.
+If there are form elements that are not visible in the viewport, use the scroll action.
 
 Continue with the airline booking process until you are prompted to provide any payment info.
 Once this occurs, you are done.
 
-Passenger #1:
-- FIRST NAME: {intent["passengers"][0]["first_name"]}
-- LAST NAME: {intent["passengers"][0]["last_name"]}
-- DATE OF BIRTH: {intent["passengers"][0]["dob"]}
-- GENDER: {intent["passengers"][0]["gender"]}
-- EMAIL: {intent["passengers"][0]["email"]}
-- PHONE NUMBER: {intent["passengers"][0]["phone_number"]}
-- EMERGENCY CONTACT: {intent["passengers"][0]["emergency_contact"]}
 """
-
-    # """
-    # ### STEP 2
-    # Review the list of available flights and select the cheapest flight, regardless of seating, baggage, or other restrictions.
-
-    # ### STEP 3
-    # Populate any passenger information using the information provided below. If there is more than one passenger, treat Passenger #1 as the primary contact for any booking or confirmation details.
-    # Once you are done populating passenger information, your task is complete. Do not provide any payment or billing information.
-
-    # Passenger #1:
-    # - FIRST NAME: Kenneth
-    # - LAST NAME: Lin
-    # - DATE OF BIRTH: September 15, 1999
-    # - GENDER: Male
-    # - EMAIL: kenneth.alex.lin@gmail.com
-    # - PHONE NUMBER: +1 626 375 6087
-    # - EMERGENCY CONTACT: Do not add an emergency contact
-    # """
+    for idx, user_info in enumerate(user_info_ls):
+        task3 += f"**Passenger #{idx + 1}**\n"
+        task3 += fmt_user_info(user_info)
 
     return task1, task2, task3
 
