@@ -19,7 +19,9 @@ def get_initial_actions(site: str):
     return actions
 
 
-def get_tasks(flight_info: dict, user_info_ls: list[dict]) -> list[str]:
+def get_tasks(
+    flight_info: dict, user_info_ls: list[dict], billing_info: dict
+) -> list[str]:
     # TODO: update type hints to validate using pydantic model once we've merged the input team branch
     # into this branch
     """
@@ -47,12 +49,28 @@ def get_tasks(flight_info: dict, user_info_ls: list[dict]) -> list[str]:
 
         ret = ""
         for key, value in user_info.items():
+            if value is None:
+                continue
+            ret += f"- {key.replace('_', ' ').title()}: {value}\n"
+        return ret
+
+    def fmt_billing_info(billing_info: dict) -> str:
+        """formats billing info for use by the agent"""
+
+        ret = ""
+        for key, value in billing_info.items():
+            if value is None:
+                continue
             ret += f"- {key.replace('_', ' ').title()}: {value}\n"
         return ret
 
     task1 = f"""
-Your goal is to search for {flight_type} flights from {flight_info["departure_code"]} to {flight_info["arrival_code"]}.
+Your goal is to search for **{flight_type}** flights from {flight_info["departure_code"]} to {flight_info["arrival_code"]}.
+
 You should only search for flights that match the following criteria:
+- Departure Airport Code: {flight_info["departure_code"]}
+- Arrival Airport Code: {flight_info["arrival_code"]}
+- Trip Type: {flight_type}
 - Departure Date: {flight_info["departure_date"]}"""
     if flight_info["round_trip"]:
         task1 += f"\n- Return Date {flight_info['return_date']}"
@@ -70,6 +88,7 @@ Once you are presented with a list of flights, you are done.
     task2 = f"""
 You are booking a {flight_type} flight from {flight_info["departure_code"]} to {flight_info["arrival_code"]}. You are currently on the page to select a flight.
 Your goal is to select the cheapest departing flight, regardless of restrictions and continue with the flight booking process until you reach a page requesting traveler personal info (e.g. First Name, Last Name, Birthday).
+Make sure to review all available flights in order to determine which is the cheapest. You may need to scroll the page up or down in order to see all of the options.
 
 Once you reached this page, you are done.
 """
@@ -81,15 +100,25 @@ Your goal is to accurately populate and submit the form using the passenger info
 You may need to expand some page elements in order to access all form elements.
 If there are form elements that are not visible in the viewport, use the scroll action.
 
-Continue with the airline booking process until you are prompted to provide any payment info.
+Continue with the airline booking process until you are prompted to provide any payment info. Make sure that you have successfully navigated to a page that is requesting your billing information.
 Once this occurs, you are done.
 
 """
+
     for idx, user_info in enumerate(user_info_ls):
         task3 += f"**Passenger #{idx + 1}**\n"
         task3 += fmt_user_info(user_info)
 
-    return task1, task2, task3
+    task4 = f"""
+You are booking a {flight_type} flight from {flight_info["departure_code"]} to {flight_info["arrival_code"]}. You are currently on the page to provide payment information and complete your booking.
+Your goal is to populate all requested billing information using the billing details provided below. DO NOT SUBMIT OR CONFIRM PURCHASE IN ANY WAY.
+
+Once you have filled in all required fields and request assistance from the user with the request_msg: "I have populated your payment information. Please review it, correct any errors, and complete the booking process."
+
+**Billing Info**
+{fmt_billing_info(billing_info)}
+"""
+    return task1, task2, task3, task4
 
 
 # Book a {intent["flight_type"]} flight from {intent["from"]} to {intent["to"]} for {intent["num_passengers"]} passenger(s).

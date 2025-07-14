@@ -21,6 +21,7 @@ run_id = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
 task1_logs_path = os.path.join(LOGS_PATH, run_id, "task1")
 task2_logs_path = os.path.join(LOGS_PATH, run_id, "task2")
 task3_logs_path = os.path.join(LOGS_PATH, run_id, "task3")
+task4_logs_path = os.path.join(LOGS_PATH, run_id, "task4")
 
 flight_info = {
     "departure_code": "SNA",
@@ -45,16 +46,29 @@ user_info_ls = [
         "country": "USA",
         "home_address": "2850 Kelvin Ave Apt 123, Irvine, CA 92614",
         "passport_number": None,
+        "rewards_account_number": None,
     }
 ]
+billing_info = {
+    "type": "Credit Card",
+    "card_number": "1234 5678 9100",
+    "expiration_date": "09-2026",
+    "cvv": "808",
+    "billing_address": "1234 Green Valley Rd, Salt Lake City, UT 71854",
+    "phone_number": "+1 881 849 9102",
+    "email_address": "kenneth.alex.lin@gmail.com",
+}
 
 llm = ChatGoogle(model="gemini-2.0-flash", temperature=0.0)
 browser_session = create_fresh_browser_session(window_orientation="top-right")
-task1, task2, task3 = get_tasks(flight_info=flight_info, user_info_ls=user_info_ls)
+task1, task2, task3, task4 = get_tasks(
+    flight_info=flight_info, user_info_ls=user_info_ls, billing_info=billing_info
+)
 
 print(task1)
 print(task2)
 print(task3)
+print(task4)
 
 controller = Controller()
 
@@ -73,7 +87,22 @@ async def clear_text(index: int, browser_session: BrowserSession) -> ActionResul
     return ActionResult(extracted_content=f"Cleared text in text input element {index}")
 
 
-testing_url = "https://www.united.com/en/us/fsr/choose-flights?f=SNA&t=SFO&d=2025-09-05&tt=1&sc=7&px=1&taxng=1&newHP=True&clm=7&st=bestmatches&tqp=R&pst=&idx=1"
+@controller.action(
+    "Request user assistance completing the current task. Use the request_msg parameter to describe what you need assistance with. The user will take over control of the browser and return control to you it when your request has been completed."
+)
+async def request_assistance(request_msg: str) -> ActionResult:
+    val = await input(
+        f"""
+        🫵 User assistance has been requested. 
+           Here's the agent's request: {request_msg} 
+           Type DONE when you would like to return control to the Agent: """
+    )
+    if val != "DONE":
+        raise ValueError(f"Expected value 'DONE' but received {val} instead.")
+    return ActionResult(
+        extracted_content=f'The user has provided assistance. The page may have changed from the last time it has been seen. Here is what the user was asked to do: "{request_msg}"'
+    )
+
 
 extended_system_message = """
 <critical_rules>
@@ -97,14 +126,13 @@ async def main():
         task=task1,
         llm=llm,
         initial_actions=get_initial_actions(site="southwest"),
-        # message_context isn't being used at all so no point in passing that arg in
-        # message_context=,
         browser_session=browser_session,
         save_conversation_path=task1_logs_path,
         use_vision=True,
     )
     result = await agent.run()
 
+    # testing_url = "https://www.southwest.com/air/booking/select-depart.html?adultsCount=1&adultPassengersCount=1&destinationAirportCode=SFO&departureDate=2025-09-01&departureTimeOfDay=ALL_DAY&fareType=USD&int=HOMEQBOMAIR&originationAirportCode=SNA&passengerType=ADULT&promoCode=&returnDate=&returnTimeOfDay=ALL_DAY&tripType=oneway"
     # step 2
     agent = Agent(
         controller=controller,
@@ -125,6 +153,18 @@ async def main():
         llm=llm,
         browser_session=browser_session,
         save_conversation_path=task3_logs_path,
+        use_vision=True,
+        extend_system_message=extended_system_message,
+    )
+    result = await agent.run()
+
+    # step 4
+    agent = Agent(
+        controller=controller,
+        task=task4,
+        llm=llm,
+        browser_session=browser_session,
+        save_conversation_path=task4_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
     )
