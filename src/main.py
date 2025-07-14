@@ -91,20 +91,20 @@ async def main():
     # initialize browser
     await browser_session.start()
 
-    # # step 1
-    # agent = Agent(
-    #     controller=controller,
-    #     task=task1,
-    #     llm=llm,
-    #     max_actions_per_step=30,
-    #     initial_actions=get_initial_actions(site="united"),
-    #     # message_context isn't being used at all so no point in passing that arg in
-    #     # message_context=,
-    #     browser_session=browser_session,
-    #     save_conversation_path=task1_logs_path,
-    #     use_vision=True,
-    # )
-    # result = await agent.run()
+    # step 1
+    agent = Agent(
+        controller=controller,
+        task=task1,
+        llm=llm,
+        max_actions_per_step=30,
+        initial_actions=get_initial_actions(site="united"),
+        # message_context isn't being used at all so no point in passing that arg in
+        # message_context=,
+        browser_session=browser_session,
+        save_conversation_path=task1_logs_path,
+        use_vision=True,
+    )
+    result = await agent.run()
 
     # step 2
     agent = Agent(
@@ -115,7 +115,7 @@ async def main():
         save_conversation_path=task2_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
-        initial_actions=get_initial_actions(site=testing_url),
+        # initial_actions=get_initial_actions(site=testing_url),
     )
     result = await agent.run()
 
