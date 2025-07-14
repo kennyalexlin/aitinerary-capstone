@@ -79,9 +79,9 @@ extended_system_message = """
 <critical_rules>
 You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
 
-The following are CRITICAL rules that must always be followed:
-1. Whenever you use the scroll action, you must only scroll in half-page increments (num_pages = 0.50). Scrolling a full page or more will lead to unstable results.
-2. NEVER use the input_text action when the text input element is not visible or is only partly visible in the browser window. Use the provided screenshot of the page in order to confirm that the element is visible before using input_text. If it is obscured, navigate the page until it is visible. For example, scrolling or expanding the widget may reveal the hidden form element.
+Below is a list of CRITICAL rules that must always be followed. Failure to adhere to them will lead to unstable page interactions that may make accomplishing your goal impossible.
+1. Whenever you use the scroll action, you must only scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content.
+2. NEVER use the input_text action when the text input element is not visible or is only partly visible in the browser window. Always use the provided screenshot of the page in order to confirm that the target element is fully visible before using input_text. If it is obscured, take necessary actions to reveal it such as scrolling the page or expanding accordion widgets.
 3. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
 </critical_rules>
 """
@@ -96,8 +96,7 @@ async def main():
         controller=controller,
         task=task1,
         llm=llm,
-        max_actions_per_step=30,
-        initial_actions=get_initial_actions(site="united"),
+        initial_actions=get_initial_actions(site="southwest"),
         # message_context isn't being used at all so no point in passing that arg in
         # message_context=,
         browser_session=browser_session,

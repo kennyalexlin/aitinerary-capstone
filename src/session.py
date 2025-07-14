@@ -59,6 +59,7 @@ def create_fresh_browser_session(
     # Configure browser session with maximum freshness
     browser_session = BrowserSession(
         headless=False,
+        viewport_expansion=0,  # websites have anti-automation blockers
         keep_alive=True,  # Don't persist between runs
         window_size={"width": 1920, "height": 1080},
         window_position={"width": position_width, "height": position_height},

@@ -9,6 +9,10 @@ def get_initial_actions(site: str):
         actions.append(
             {"go_to_url": {"url": "https://www.united.com", "new_tab": False}}
         )
+    elif site == "southwest":
+        actions.append(
+            {"go_to_url": {"url": "https://www.southwest.com", "new_tab": False}}
+        )
     else:
         actions.append({"go_to_url": {"url": site, "new_tab": False}})
 
@@ -72,7 +76,7 @@ Once you reached this page, you are done.
 
     task3 = f"""
 You are booking a {flight_type} flight from {flight_info["departure_code"]} to {flight_info["arrival_code"]}. You are currently on the page to provide traveler information to the airline.
-Your goal is to accurately populate and submit the form using the passenger information provided below.
+Your goal is to accurately populate and submit the form using the passenger information provided below. Note that not all fields will be required to submit the form. Only populate fields that are required.
 
 You may need to expand some page elements in order to access all form elements.
 If there are form elements that are not visible in the viewport, use the scroll action.
