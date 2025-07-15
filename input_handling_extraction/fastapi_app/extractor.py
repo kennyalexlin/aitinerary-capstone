@@ -1,10 +1,14 @@
+import os
+from dotenv import load_dotenv
 import requests
 import json
 import re
 from typing import List, Dict, Optional
 
+load_dotenv()
+
 # DeepSeek API configuration
-DEEPSEEK_API_KEY = "sk-62497041b697410a9df5f50e738e409d"
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
 
 def extract_flight_info_from_message(user_message: str) -> dict:
@@ -46,7 +50,7 @@ def extract_flight_info_from_message(user_message: str) -> dict:
                 {"role": "system", "content": "You are a flight booking data extractor. Extract flight information and return ONLY valid JSON."},
                 {"role": "user", "content": extraction_prompt}
             ],
-            "max_tokens": 300,
+            "max_tokens": 700,
             "temperature": 0.1  # Low temperature for consistent extraction
         }
         

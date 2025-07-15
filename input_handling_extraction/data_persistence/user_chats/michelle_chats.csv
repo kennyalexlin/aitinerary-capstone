@@ -1,0 +1,33 @@
+session_id,timestamp,role,content
+session_20250714_172455_0,2025-07-14T17:24:55.305252,user,"hello, I want to book a flight from nyc to tokyo"
+session_20250714_172455_0,2025-07-14T17:25:09.111647,assistant,"Great! You're looking to fly from New York to Tokyo. To help find the best options for you, I'll need a few more details:
+
+1. When would you like to depart?
+2. Is this a round-trip or one-way flight?
+3. How many passengers will be traveling (adults/children/infants)?
+
+Let's start with your travel dates - what's your preferred departure date?"
+session_20250714_172755_0,2025-07-14T17:27:55.948456,user,"hello, I want to book a flight from nyc to tokyo"
+session_20250714_172755_0,2025-07-14T17:28:10.641097,assistant,"Great! You're looking to fly from New York to Tokyo. To help you book this flight, I'll need a few more details:
+
+1. When would you like to depart for Tokyo?
+2. Is this a round-trip or one-way flight?
+3. How many passengers will be traveling (adults/children/infants)?
+
+Let's start with the departure date - what date were you thinking of flying out?"
+session_20250714_172755_0,2025-07-14T17:28:35.527176,user,I will fly out on august 24th 2025 and return september 9th 2025
+session_20250714_172755_0,2025-07-14T17:28:51.218699,assistant,"Great! I have your travel dates confirmed as August 24, 2025 to September 9, 2025 for your New York to Tokyo trip.  
+
+To complete your booking, I just need to know:  
+1. How many adults will be traveling?  
+2. What cabin class would you prefer (economy, premium economy, business, or first class)?  
+
+Would you like to share these details so I can find the best flight options for you?"
+session_20250714_172755_0,2025-07-14T17:29:51.642119,user,hello
+session_20250714_172755_0,2025-07-14T17:30:05.030781,assistant,"Hello! I'd be happy to help you book a flight. To get started, could you tell me:  
+
+1. Where are you flying from?  
+2. Where would you like to go?  
+3. When do you plan to travel?  
+
+Let me know, and we'll get your booking sorted!"
