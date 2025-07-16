@@ -20,7 +20,7 @@ def get_initial_actions(site: str):
 
 
 def get_tasks(
-    flight_info: dict, user_info_ls: list[dict], billing_info: dict
+    flight_info: dict, user_info_ls: list[dict], user_billing_info: dict
 ) -> list[str]:
     # TODO: update type hints to validate using pydantic model once we've merged the input team branch
     # into this branch
@@ -116,7 +116,7 @@ Your goal is to populate all requested billing information using the billing det
 Once you have filled in all required fields and request assistance from the user with the request_msg: "I have populated your payment information. Please review it, correct any errors, and complete the booking process."
 
 **Billing Info**
-{fmt_billing_info(billing_info)}
+{fmt_billing_info(user_billing_info)}
 """
     return task1, task2, task3, task4
 
