@@ -53,7 +53,7 @@ def create_fresh_browser_session(
         position_height = 0
     else:
         logging.warning(
-            f"window_orientation {window_orientation} is not supported. Valid values are 'top-left' or 'top-right'"
+            f"window_orientation {window_orientation} is not supported. Valid values are 'top-left' or 'top-right'. Defaulting to 'top-left'."
         )
 
     # Configure browser session with maximum freshness

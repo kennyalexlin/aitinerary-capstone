@@ -1,4 +1,14 @@
-def get_initial_actions(site: str):
+import sys
+
+# TODO: no longer need to add this to path once we re-organize project
+# replace this with the absolute path to the pydantic data models file
+sys.path.append(
+    "/Users/kennyalexlin/Desktop/MIDS/W210/aitinerary-capstone/input_handling_extraction/fastapi_app/models"
+)
+from chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
+
+
+def get_initial_actions(site: str) -> list[dict]:
     """Returns a list of initial actions for the agent to take"""
     actions = []
     if site == "delta":
@@ -20,10 +30,11 @@ def get_initial_actions(site: str):
 
 
 def get_tasks(
-    flight_info: dict, user_info_ls: list[dict], user_billing_info: dict
-) -> list[str]:
-    # TODO: update type hints to validate using pydantic model once we've merged the input team branch
-    # into this branch
+    flight_info: FlightInfo,
+    user_info_ls: list[UserInfo],
+    user_billing_info: UserBillingInfo,
+    user_preferences: UserPreferences = None,
+) -> tuple[str]:
     """
     Generates a user task based on a prompt template
     and task parameters

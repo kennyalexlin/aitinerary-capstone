@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import sys
 from datetime import datetime
 
 from browser_use import Agent
@@ -11,20 +12,29 @@ from controller import custom_controller
 from prompting import get_initial_actions, get_tasks
 from session import create_fresh_browser_session
 
-load_dotenv()
-
-# browser-use already creates its own uid for logs but we need a way to organize
-# multiple sets of logs in the same run
+# TODO: no longer need to add this to path once we re-organize project
+# replace this with the absolute path to the pydantic data models file
+sys.path.append(
+    "/Users/kennyalexlin/Desktop/MIDS/W210/aitinerary-capstone/input_handling_extraction/fastapi_app/models"
+)
+from chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
 
 
 async def do_flight_booking(
-    flight_info,
-    user_info_ls,
-    user_billing_info,
-    user_preferences=None,
-    logs_path="logs",
+    flight_info: FlightInfo,
+    user_info_ls: list[UserInfo],
+    user_billing_info: UserBillingInfo,
+    user_preferences: UserPreferences = None,
+    logs_path: str = "logs",
 ):
-    """Kick off agentic flight booking process
+    """Kick off agentic flight booking process.
+
+    There are 4 "tasks" currently defined:
+        1. Search for a flight on the home page
+        2. Select a flight
+            TODO: implement use of the budget parameter instead of just searching for the cheapest flight
+        3. Populate traveler information
+        4. Populate billing information - currently requests confirmation from the user once for review once info has been populated
 
     Args
         flight_info: a FlightInfo object representing the parameters to use when searching
@@ -37,8 +47,12 @@ async def do_flight_booking(
             timestamp this function was called
 
     """
+    # load environment variables
+    load_dotenv()
 
     # define paths for logs
+    # browser-use already creates its own uid for logs but we need a way to organize
+    # multiple sets of logs in the same run
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
 
     run_logs_path = os.path.join(logs_path, run_id)
