@@ -9,8 +9,11 @@ readme = "README.md"
 requires-python = ">=3.13,<4.0"
 dependencies = [
     "browser-use[cli]>=0.5.4",
+    "fastapi>=0.116.1",
     "playwright>=1.53.0",
+    "requests>=2.32.4",
     "ruff>=0.12.1",
     "screeninfo>=0.8.1",
     "streamlit>=1.46.1",
+    "uvicorn[standard]>=0.35.0",
 ]
