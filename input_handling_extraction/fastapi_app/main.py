@@ -19,7 +19,7 @@ app = FastAPI(
 #     CORSMiddleware,
 #     allow_origins=["http://localhost:8501", "http://127.0.0.1:8501"],
 #     allow_credentials=True,
-#     allow_methods=["*"],
+#     allow_methods=["*"], 
 #     allow_headers=["*"],
 # )
 
@@ -47,7 +47,7 @@ class FlightInfo(BaseModel):
     refundable : Optional[bool] = False
     redress_number: Optional[int] = None
 
-class UserInfo(BaseModel):
+class UserInfo(BaseModel):  
     first_name: str
     last_name: str
     name_suffix: Optional[str] = None

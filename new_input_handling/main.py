@@ -1,17 +1,13 @@
-# file: main.py
-
 from fastapi import FastAPI
 from datetime import datetime
 import json
 import os
 import uuid
-
-# --- LOCAL IMPORTS ---
+from google import genai
 from llm_logic import get_llm_response
-# Import ALL the Pydantic models needed by this file from their single source of truth.
 from models import ChatSession, ChatRequest, ChatResponse, FlightInfo, UserInfo, ChatMessage
 
-# --- App Initialization (CORRECTED - NO DUPLICATION) ---
+# App Initialization 
 app = FastAPI(
     title="Flight Booking Chat API",
     description="A chat-based API for collecting flight booking information",
@@ -21,28 +17,38 @@ app = FastAPI(
 # In-memory storage (replace with a database in production)
 chat_sessions: dict[str, ChatSession] = {}
 
-# Create subdirectory for bookings if it doesn't exist
+# Create subdirectory for bookings
 BOOKINGS_DIR = "bookings"
 os.makedirs(BOOKINGS_DIR, exist_ok=True)
 
-
 @app.get("/")
 def root():
-    # Provide a proper JSON response for the root endpoint
     return {"message": "Flight Booking Chat API is running", "status": "healthy"}
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     session_id = request.session_id
-    
+    user_content = request.content.strip()
+
+    # Find or create the session
     if session_id and session_id in chat_sessions:
         session = chat_sessions[session_id]
     else:
-        # This is a new chat session
         session_id = str(uuid.uuid4())
         session = ChatSession(session_id=session_id)
         chat_sessions[session_id] = session
-        initial_message = "Hello! I'm your flight booking assistant. Where would you like to fly from?"
+
+    # If this is the very first interaction and the user hasn't typed anything,
+    # (e.g., the web app just loaded), send the initial welcome message.
+    if not session.messages and not user_content:
+        initial_message = """Hello! I'm your flight booking assistant. To get started, could you tell me a bit about your trip? I'm looking for:
+- The Airport or City you wish to depart from
+- Your destination (Airport or City you will arrive in)
+- Whether this is a one-way or round-trip journey
+- The dates you are travelling
+- The number of passengers
+
+You can provide this all at once, or we can go step-by-step!"""
         session.messages.append(ChatMessage(role="assistant", content=initial_message))
         
         return ChatResponse(
@@ -53,10 +59,10 @@ def chat(request: ChatRequest):
             user_info=session.user_info
         )
 
-    # Add the user's message to the existing session
+    # For any message that has content, add it to the session and process it.
     session.messages.append(ChatMessage(role="user", content=request.content))
 
-    # Pass the whole session object to the LLM logic
+    # Pass the whole session object to the LLM logic for a response.
     llm_data = get_llm_response(session) 
     
     assistant_message = llm_data["assistant_message"]
@@ -77,7 +83,6 @@ def chat(request: ChatRequest):
         
         file_path = os.path.join(BOOKINGS_DIR, f"booking_{session.session_id}.json")
         with open(file_path, 'w') as f:
-            # Custom JSON encoder for date objects
             json.dump(final_data, f, indent=4, default=str)
             
         del chat_sessions[session_id]

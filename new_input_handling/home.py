@@ -38,7 +38,7 @@ def new_chat():
     except requests.exceptions.ConnectionError:
         st.error("Connection Error: Could not connect to the backend. Please make sure it's running.")
 
-# --- Layout ---
+# Layout 
 col1, col2 = st.columns([2, 1])
 
 with col1:
