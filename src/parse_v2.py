@@ -52,7 +52,7 @@ message_pre_agent = """
 1. Invoke filter_booking_controls().
 2. From the returned list, look for "One-way" or "Round-trip" and click that selector.
 3. Then fill origin/destination/date.
-4. Click on "Find flights" or "Book now" (something similar).
+4. Click on "Find flights"; it should be within the same box as the above elements.
 5. Wait for flight results.
 6. Invoke filter_booking_controls() again, locate the first flight's "Select" button, click it.
 7. Wait for the traveler info form to appear (check by waiting selector).
@@ -62,6 +62,7 @@ message_pre_agent = """
 task_setup = """
 You are booking a one-way flight from JFK to LAX on www.southwest.com. You are currently on flight company homepage.
 -- First, clear all existing texts in From and To (or Depart and Arrive) boxes.
+-- Choose "One-way" flight under "Flight Type". 
 -- Type the airport code "JFK" into the origin input field exactly once.
 -- After typing, click the autocomplete option, then pause and wait for the field to show JFK.
 -- Do NOT add extra key presses or repeat characters.
