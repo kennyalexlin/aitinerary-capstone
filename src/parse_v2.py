@@ -48,16 +48,27 @@ In the traveler info page / traveler booking page, invoke filter_interactive_fie
 Once you have the list, format it and call done.
 """
 
+message_pre_agent = """
+1. Invoke filter_booking_controls().
+2. From the returned list, look for "One-way" or "Round-trip" and click that selector.
+3. Then fill origin/destination/date.
+4. Click on "Find flights" or "Book now" (something similar).
+5. Wait for flight results.
+6. Invoke filter_booking_controls() again, locate the first flight's "Select" button, click it.
+7. Wait for the traveler info form to appear (check by waiting selector).
+8. Once on traveler info, return the URL via done.
+"""
+
 task_setup = """
-You are booking a one-way flight from JFK to LAX on www.united.com. You are currently on flight company homepage.
--- First, clear all existing texts in From and To boxes.
+You are booking a one-way flight from JFK to LAX on www.southwest.com. You are currently on flight company homepage.
+-- First, clear all existing texts in From and To (or Depart and Arrive) boxes.
 -- Type the airport code "JFK" into the origin input field exactly once.
 -- After typing, click the autocomplete option, then pause and wait for the field to show JFK.
 -- Do NOT add extra key presses or repeat characters.
 -- Repeat the same for LAX.
 Book a one-way flight on August 1.
 Yo will be navigated to a list of flights. Select the first flight and continue with the booking process until you are prompted to provide any traveler info.
-Once this occurs, stop proceeding or performing any actions. Return the exact URL of this page; it should contain: united.com and one of these path segments (or something similar):
+Once this occurs, stop proceeding or performing any actions. Return the exact URL of this page; it should contain: southwest.com and one of these path segments (or something similar):
 - /booking/passenger
 - /checkout/traveler
 - /purchase/details
@@ -68,60 +79,56 @@ Once on a URL containing '/traveler/choose-travelers' or '/booking/passenger':
 - Do not click previous pages or rethink flight selection.
 """
 
-# customer function for DOM filtering
+# customer functions for DOM filtering
 
 controller = Controller()
 
-@controller.action("Return named typable/selectable/focusable DOM fields")
+@controller.action("Return flight booking controls")
+async def filter_booking_controls() -> ActionResult:
+    js = r"""
+    const needed = ["one-way", "round-trip", "depart", "return", "find flights", "select", "continue", "next"];
+    return Array.from(document.querySelectorAll('button, select, input[type="text"], input[type="date"]'))
+      .filter(el => {
+        const text = (el.innerText || el.value || el.getAttribute('aria-label') || "").toLowerCase();
+        return needed.some(k => text.includes(k));
+      })
+      .map(el => ({
+        tag: el.tagName,
+        selector: el.tagName.toLowerCase()
+                  + (el.id ? `#${el.id}` : el.name ? `[name="${el.name}"]` : ""),
+        text: (el.innerText || el.value || el.getAttribute('aria-label') || "").trim()
+      }));
+    """
+    return ActionResult(js=js)
+
+
+@controller.action("Return named, focused, and relevant DOM fields")
 async def filter_interactive_fields() -> ActionResult:
     js = r"""
-    function getAccessibleName(el) {
-      // Use ariaLabel, aria-labelledby or inner text/placeholder
+    function getName(el) {
       if (el.ariaLabel) return el.ariaLabel;
-      if (el.getAttribute('aria-labelledby')) {
-        const ids = el.getAttribute('aria-labelledby').split(' ');
-        return ids.map(id => document.getElementById(id)?.innerText).filter(Boolean).join(' ');
-      }
-      // Labels associated by <label for>
-      if (el.labels?.length) {
-        return Array.from(el.labels).map(l => l.innerText).join(' ');
-      }
-      // Fallback to visible text or placeholder
-      if (el.innerText && el.innerText.trim()) return el.innerText.trim();
+      const abz = el.getAttribute('aria-labelledby');
+      if (abz) return abz.split(' ').map(id => document.getElementById(id)?.innerText).join(' ');
+      if (el.labels?.length) return Array.from(el.labels).map(l => l.innerText).join(' ');
       if (el.placeholder) return el.placeholder;
-      return null;
+      if (el.title) return el.title;
+      return el.innerText?.trim() || null;
     }
-
     return Array.from(document.querySelectorAll(
-      'input:not([type=hidden]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [contenteditable="true"]'
+      'input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
     )).filter(el => {
-      if (el.tagName === 'INPUT') {
-        return ['text','email','search','url','tel','password','number','date',
-                'datetime-local','month','time','week']
-          .includes(el.type.toLowerCase());
-      }
-      return true;
+      const name = getName(el);
+      return name && /First name|Last name|Middle|Birth|Gender|Suffix|Frequent flyer/i.test(name);
     }).map(el => {
-      const name = getAccessibleName(el);
       const rect = el.getBoundingClientRect();
       return {
         tag: el.tagName,
         type: el.type || null,
-        id: el.id || null,
-        name: name,
-        xpath: (() => {
-          let path = '', node = el;
-          while (node && node.nodeType === Node.ELEMENT_NODE) {
-            let idx = 1, sib = node.previousElementSibling;
-            while (sib) {
-              if (sib.tagName === node.tagName) idx++;
-              sib = sib.previousElementSibling;
-            }
-            path = `/${node.tagName}[${idx}]` + path;
-            node = node.parentNode;
-          }
-          return path;
-        })(),
+        selector: el.tagName.toLowerCase() +
+          (el.name ? `[name="${el.name}"]` : el.id ? `#${el.id}` : ''),
+        name: getName(el),
+        value: el.value || null,
+        required: el.required || el.getAttribute('aria-required') === 'true',
         visible: rect.width > 0 && rect.height > 0
       };
     });
@@ -129,15 +136,16 @@ async def filter_interactive_fields() -> ActionResult:
     return ActionResult(js=js)
 
 
+
 async def main():
     # pre-agent: setup a valid session (e.g., login/search) to get to booking page
     setup_agent = Agent(
-        task="Book one-way flight JFK→LAX on Aug 1. Once traveler info form loads, stop and return the URL.",
+        task=task_setup,
         llm=llm,
         initial_actions=[
-    {"go_to_url": {"url": "https://www.united.com","new_tab": False}}
+    {"go_to_url": {"url": "https://www.southwest.com","new_tab": False}}
   ],
-        message_context = task_setup,
+        message_context = message_pre_agent,
         use_vision=True
     )
     try:
@@ -156,11 +164,11 @@ async def main():
         raise ValueError(f"Could not parse URL from setup_agent result: {extract}")
     print("✅ Setup complete, navigating to:", website)
 
-    # 2️⃣ Main agent: operate on the established page
+    # main DOM parsing agent: operate on the established page
     main_agent = Agent(
         task="Filter traveler info page DOM and list interactive fields.",
         initial_actions=[
-            {"go_to_url": {"url": website, "new_tab": False}}],
+            {"go_to_url": {"url": website, "new_tab": False}}], # page should already be traveler info
         llm=llm,
         controller=controller,
         message_context=message_context,
