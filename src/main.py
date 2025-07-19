@@ -63,7 +63,7 @@ async def do_flight_booking(
     logging.info(f"Logs will be saved to {run_logs_path}")
 
     # define model to use
-    model = "gemini-2.0-flash"
+    model = "gemini-2.5-flash"
     llm = ChatGoogle(model=model, temperature=0.0)
     logging.info(f"Initialized LLM with model {model}")
 
@@ -89,10 +89,9 @@ async def do_flight_booking(
     extended_system_message = """
     <critical_rules>
     You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
-
     Below is a list of CRITICAL rules that must always be followed. Failure to adhere to them will lead to unstable page interactions that may make accomplishing your goal impossible.
-    1. Whenever you use the scroll action, you must only scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content.
-    2. NEVER use the input_text action when the text input element is not visible or is only partly visible in the browser window. Always use the provided screenshot of the page in order to confirm that the target element is fully visible before using input_text. If it is obscured, take necessary actions to reveal it such as scrolling the page or expanding accordion widgets.
+    1. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
+    2. Whenever you use the scroll action, prefer to scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content. 
     3. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
     </critical_rules>
     """
@@ -149,13 +148,13 @@ async def do_flight_booking(
 
 # define demo flight info
 flight_info = {
-    "departure_code": "SNA",
+    "departure_code": "LAX",
     "arrival_code": "SFO",
     "departure_date": "2025-09-01",
     "return_date": None,
     "adult_passengers": 1,
     "round_trip": False,
-    "cabin_class": "Economy",
+    "cabin_class": "Basic",
     "routing": "direct",
 }
 
