@@ -61,30 +61,13 @@ def create_fresh_browser_session(
         headless=False,
         viewport_expansion=0,  # websites have anti-automation blockers
         keep_alive=True,  # Don't persist between runs
-        window_size={"width": 1920, "height": 1080},
-        window_position={"width": position_width, "height": position_height},
+        # window_size={"width": 1920, "height": 1080},
+        # viewport={"width": 1920, "height": 1040},
+        # window_position={"width": position_width, "height": position_height},
         minimum_wait_page_load_time=0.5,
         storage_state=None,  # No stored cookies/localStorage
-        browser_config={
-            "args": [
-                "--disable-blink-features=AutomationControlled",
-                "--disable-web-security",
-                "--no-first-run",
-                "--no-default-browser-check",
-                "--disable-restore-session-state",
-                "--disable-background-networking",
-                "--incognito",  # Force private browsing
-                "--disable-extensions",
-                "--disable-plugins",
-                "--disable-sync",
-                "--disable-session-crashed-bubble",
-                "--disable-infobars",
-                "--disable-translate",
-                "--disk-cache-size=0",  # No disk cache
-                "--media-cache-size=0",  # No media cache
-                "--aggressive-cache-discard",
-            ]
-        },
+        args=[
+        ],
     )
 
     return browser_session

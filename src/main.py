@@ -63,8 +63,10 @@ async def do_flight_booking(
     logging.info(f"Logs will be saved to {run_logs_path}")
 
     # define model to use
-    model = "gemini-2.5-flash"
+    model = "gemini-2.0-flash"
+    # model = 'gpt-4.1-mini'
     llm = ChatGoogle(model=model, temperature=0.0)
+    # llm = ChatOpenAI(model=model, temperature=0)
     logging.info(f"Initialized LLM with model {model}")
 
     # generate user tasks for agent
