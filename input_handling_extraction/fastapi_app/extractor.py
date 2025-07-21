@@ -4,12 +4,23 @@ import requests
 import json
 import re
 from typing import List, Dict, Optional
+from .airport_resolver import resolve_airport_info
 
 load_dotenv()
 
 # DeepSeek API configuration
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1/chat/completions"
+
+def postprocess_flight_info(flight_info: dict) -> dict:
+    """resolve city names to IATA codes for departure and arrival cities."""
+    for key in ["departure_city", "arrival_city"]:
+        value = flight_info.get(key)
+        if value:
+            resolved = resolve_airport_info(value)
+            if resolved["status"] == "resolved":
+                flight_info[key + "_iata"] = resolved["iata"]
+    return flight_info
 
 def extract_flight_info_from_message(user_message: str) -> dict:
     """use LLM to extract flight information from the most recent user message"""
@@ -64,6 +75,8 @@ def extract_flight_info_from_message(user_message: str) -> dict:
         json_match = re.search(r'\{.*\}', extracted_text, re.DOTALL)
         if json_match:
             extracted_json = json.loads(json_match.group())
+            # Post-process to resolve IATA codes
+            extracted_json = postprocess_flight_info(extracted_json)
             return extracted_json
         else:
             print(f"Could not parse JSON from: {extracted_text}")

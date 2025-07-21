@@ -4,7 +4,9 @@ from datetime import datetime
 
 class FlightInfo(BaseModel):
     departure_city: str
+    departure_iata: Optional[str] = None
     arrival_city: str
+    arrival_iata: Optional[str] = None
     departure_date: str
     return_date: Optional[str] = None
     adult_passengers: int = 1
@@ -18,6 +20,7 @@ class FlightInfo(BaseModel):
     points_booking: Optional[bool] = False
     refundable: Optional[bool] = False
     redress_number: Optional[int] = None
+
 
 class UserInfo(BaseModel):
     first_name: str
