@@ -1,23 +1,16 @@
 import asyncio
 import logging
 import os
-import sys
 from datetime import datetime
 
 from browser_use import Agent
 from browser_use.llm import ChatGoogle
 from dotenv import load_dotenv
 
-from controller import custom_controller
-from prompting import get_initial_actions, get_tasks
-from session import create_fresh_browser_session
-
-# TODO: no longer need to add this to path once we re-organize project
-# replace this with the absolute path to the pydantic data models file
-sys.path.append(
-    "/Users/kennyalexlin/Desktop/MIDS/W210/aitinerary-capstone/input_handling_extraction/fastapi_app/models"
-)
-from chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
+from agent.controller import custom_controller
+from agent.prompting import get_initial_actions, get_tasks
+from agent.session import create_fresh_browser_session
+from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
 
 
 async def do_flight_booking(
@@ -109,7 +102,7 @@ async def do_flight_booking(
         use_vision=True,
         extended_system_message=extended_system_message,
     )
-    result = await agent.run()
+    await agent.run()
 
     # step 2
     agent = Agent(
@@ -121,7 +114,7 @@ async def do_flight_booking(
         use_vision=True,
         extend_system_message=extended_system_message,
     )
-    result = await agent.run()
+    await agent.run()
 
     # step 3
     agent = Agent(
@@ -133,7 +126,7 @@ async def do_flight_booking(
         use_vision=True,
         extend_system_message=extended_system_message,
     )
-    result = await agent.run()
+    await agent.run()
 
     # step 4
     agent = Agent(
@@ -145,7 +138,7 @@ async def do_flight_booking(
         use_vision=True,
         extend_system_message=extended_system_message,
     )
-    result = await agent.run()
+    await agent.run()
 
 
 # define demo flight info
