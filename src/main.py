@@ -82,7 +82,7 @@ async def do_flight_booking(
     logging.info(f"TASK #4: FILL IN PAYMENT INFO\n{task4}")
 
     # initialize and kick off chromium browser session
-    browser_session = create_fresh_browser_session(window_orientation="top-right")
+    browser_session = create_fresh_browser_session()
     logging.info("Created fresh browser session")
     await browser_session.start()
     logging.info("Browser session initialized")
@@ -180,7 +180,7 @@ user_info_ls = [
 # define demo UserBillingInfo
 user_billing_info = {
     "type": "Credit Card",
-    "card_number": "1234 5678 9100",
+    "card_number": "4147 5678 9100",
     "expiration_date": "09-2026",
     "cvv": "808",
     "billing_address": "1234 Green Valley Rd, Salt Lake City, UT 71854",

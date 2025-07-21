@@ -5,6 +5,9 @@ from pathlib import Path
 import screeninfo
 from browser_use import BrowserSession
 
+DEFAULT_WINDOW_WIDTH = 1440
+DEFAULT_WINDOW_HEIGHT = 900
+
 
 def clear_browseruse_cache():
     """Clear browser-use default cache directory"""
@@ -32,42 +35,27 @@ def get_screen_dimensions():
     return primary_monitor.width, primary_monitor.height
 
 
-def create_fresh_browser_session(
-    window_width: int = 1920,
-    window_height: int = 1080,
-    window_orientation: str = "top-right",
-):
+def create_fresh_browser_session():
     """Create a completely fresh browser session with aggressive cache clearing"""
     # Clear browser-use's own cache first
     clear_browseruse_cache()
 
-    # by default, browser-use opens the playwright window in the top left-hand corner
-    position_width = 0
-    position_height = 0
-
-    if window_orientation == "top-left":
-        pass
-    elif window_orientation == "top-right":
-        screen_width, screen_height = get_screen_dimensions()
-        position_width = screen_width - window_width
-        position_height = 0
-    else:
+    window_size = {"width": DEFAULT_WINDOW_WIDTH, "height": DEFAULT_WINDOW_HEIGHT}
+    screen_width, screen_height = get_screen_dimensions()
+    if screen_width < window_size["width"] or screen_height < window_size["height"]:
         logging.warning(
-            f"window_orientation {window_orientation} is not supported. Valid values are 'top-left' or 'top-right'. Defaulting to 'top-left'."
+            f"Screen dimensions of {screen_width}px by {screen_height}px are insufficient to support the default window size of {window_size['width']}px by {window_size['heigth']}px. So, window_size will be set to fill your screen instead."
         )
+        window_size = None
 
     # Configure browser session with maximum freshness
     browser_session = BrowserSession(
         headless=False,
         viewport_expansion=0,  # websites have anti-automation blockers
         keep_alive=True,  # Don't persist between runs
-        # window_size={"width": 1920, "height": 1080},
-        # viewport={"width": 1920, "height": 1040},
-        # window_position={"width": position_width, "height": position_height},
         minimum_wait_page_load_time=0.5,
         storage_state=None,  # No stored cookies/localStorage
-        args=[
-        ],
+        window_size=window_size,
     )
 
     return browser_session
