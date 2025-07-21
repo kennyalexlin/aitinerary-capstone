@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class FlightInfo(BaseModel):
     departure_city: str
@@ -18,28 +20,31 @@ class FlightInfo(BaseModel):
     refundable: Optional[bool] = False
     redress_number: Optional[int] = None
 
+
 class UserInfo(BaseModel):
     first_name: str
     last_name: str
     name_suffix: Optional[str] = None
     email: str
-    phone_number: Optional[str] = None 
+    phone_number: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: str
     country: Optional[str] = None
     home_address: Optional[str] = None
     passport_number: Optional[str] = None
 
+
 class UserBillingInfo(BaseModel):
     name_on_card: str
-    card_number: int
-    expiration_date: int
-    cvv: int
+    card_number: str
+    expiration_date: str
+    cvv: str = Field(min_length=3, max_length=3)
     billing_address: str
     city: str
     state_province: str
-    zip_code: int
+    zip_code: str
     country_region: str
+
 
 class UserPreferences(BaseModel):
     preferred_airlines: Optional[List[str]] = None
@@ -48,10 +53,12 @@ class UserPreferences(BaseModel):
     special_assistance: Optional[str] = None
     travel_insurance: Optional[bool] = None
 
+
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
     content: str
     timestamp: Optional[str] = None
+
 
 class ChatSession(BaseModel):
     session_id: str
@@ -60,8 +67,9 @@ class ChatSession(BaseModel):
     user_info: Optional[UserInfo] = None
     user_preferences: Optional[UserPreferences] = None
 
+
 class ChatRequest(BaseModel):
     role: str
     content: str
     session_id: Optional[str] = None
-    username: Optional[str] = None 
+    username: Optional[str] = None
