@@ -173,19 +173,20 @@ user_info_ls = [
         "country": "USA",
         "home_address": "2850 Kelvin Ave Apt 123, Irvine, CA 92614",
         "passport_number": None,
-        "rewards_account_number": None,
     }
 ]
 
 # define demo UserBillingInfo
 user_billing_info = {
-    "type": "Credit Card",
+    "name_on_card": "Kenneth Lin",
     "card_number": "4147 5678 9100",
     "expiration_date": "09-2026",
     "cvv": "808",
-    "billing_address": "1234 Green Valley Rd, Salt Lake City, UT 71854",
-    "phone_number": "+1 881 849 9102",
-    "email_address": "kenneth.alex.lin@gmail.com",
+    "billing_address": "1234 Green Valley Rd",
+    "city": "Salt Lake City",
+    "state_province": "UT",
+    "zip_code": "71854",
+    "country_region": "USA",
 }
 
 
