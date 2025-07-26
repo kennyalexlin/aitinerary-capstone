@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import os
 from datetime import datetime
@@ -11,6 +12,8 @@ from agent.controller import custom_controller
 from agent.prompting import get_initial_actions, get_tasks
 from agent.session import create_fresh_browser_session
 from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
+
+EVALUATION_IDX = 1
 
 
 async def do_flight_booking(
@@ -53,11 +56,16 @@ async def do_flight_booking(
     task2_logs_path = os.path.join(run_logs_path, "task2")
     task3_logs_path = os.path.join(run_logs_path, "task3")
     task4_logs_path = os.path.join(run_logs_path, "task4")
+
+    task1_gif_path = os.path.join(run_logs_path, "task1.gif")
+    task2_gif_path = os.path.join(run_logs_path, "task2.gif")
+    task3_gif_path = os.path.join(run_logs_path, "task3.gif")
+    task4_gif_path = os.path.join(run_logs_path, "task4.gif")
     logging.info(f"Logs will be saved to {run_logs_path}")
 
     # define model to use
     model = "gemini-2.0-flash"
-    # model = 'gpt-4.1-mini'
+    # model = "gpt-4.1-mini"
     llm = ChatGoogle(model=model, temperature=0.0)
     # llm = ChatOpenAI(model=model, temperature=0)
     logging.info(f"Initialized LLM with model {model}")
@@ -101,6 +109,8 @@ async def do_flight_booking(
         save_conversation_path=task1_logs_path,
         use_vision=True,
         extended_system_message=extended_system_message,
+        max_actions_per_step=2,
+        generate_gif=task1_gif_path,
     )
     await agent.run()
 
@@ -113,6 +123,8 @@ async def do_flight_booking(
         save_conversation_path=task2_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
+        max_actions_per_step=2,
+        generate_gif=task2_gif_path,
     )
     await agent.run()
 
@@ -125,6 +137,7 @@ async def do_flight_booking(
         save_conversation_path=task3_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
+        generate_gif=task3_gif_path,
     )
     await agent.run()
 
@@ -137,21 +150,30 @@ async def do_flight_booking(
         save_conversation_path=task4_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
+        generate_gif=task4_gif_path,
     )
     await agent.run()
 
 
-# define demo flight info
-flight_info = {
-    "departure_code": "LAX",
-    "arrival_code": "SFO",
-    "departure_date": "2025-09-01",
-    "return_date": None,
-    "adult_passengers": 1,
-    "round_trip": False,
-    "cabin_class": "Basic",
-    "routing": "direct",
-}
+# flight_info = {
+#     "departure_code": "OAK",
+#     "arrival_code": "BOS",
+#     "departure_date": "2025-10-01",
+#     "return_date": "2025-10-15",
+#     "adult_passengers": 1,
+#     "round_trip": True,
+#     "cabin_class": "Wanna Get Away Plus",
+#     "routing": "one_stop",
+# }
+
+
+with open("src/evaluation/input_samples.jsonl", "r", encoding="utf-8") as f:
+    for idx, line in enumerate(f, 1):
+        if idx == EVALUATION_IDX:
+            line = line.strip()
+            flight_info = json.loads(line)
+
+logs_path = f"logs/input_sample_{EVALUATION_IDX}"
 
 # define demo UserInfo
 user_info_ls = [
@@ -188,6 +210,7 @@ async def main():
         flight_info=flight_info,
         user_info_ls=user_info_ls,
         user_billing_info=user_billing_info,
+        logs_path=logs_path,
     )
 
 

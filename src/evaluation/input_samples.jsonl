@@ -1,0 +1,10 @@
+{"departure_airport": "DAL", "arrival_airport": "HOU", "departure_date": "2025-08-01", "adult_passengers":1, "cabin_class": "Basic", "routing": "one_stop", "round_trip": false}
+{"departure_airport": "LAX", "arrival_airport": "LAS", "departure_date": "2025-09-05", "return_date": "2025-09-12", "adult_passengers":1, "cabin_class": "Wanna Get Away Plus", "routing": "direct", "round_trip": true}
+{"departure_airport": "MDW", "arrival_airport": "MCO", "departure_date": "2025-10-10", "adult_passengers":1, "cabin_class": "Anytime", "routing": "one_stop", "round_trip": false}
+{"departure_airport": "BWI", "arrival_airport": "ATL", "departure_date": "2025-11-07", "return_date": "2025-11-14", "adult_passengers":1, "cabin_class": "Basic", "routing": "direct", "round_trip": true}
+{"departure_airport": "DEN", "arrival_airport": "PHX", "departure_date": "2025-12-05", "adult_passengers":1, "cabin_class": "Wanna Get Away Plus", "routing": "one_stop", "round_trip": false}
+{"departure_airport": "OAK", "arrival_airport": "SAN", "departure_date": "2026-01-09", "return_date": "2026-01-16", "adult_passengers":1, "cabin_class": "Anytime", "routing": "direct", "round_trip": true}
+{"departure_airport": "MCI", "arrival_airport": "STL", "departure_date": "2026-02-06", "adult_passengers":1, "cabin_class": "Basic", "routing": "one_stop", "round_trip": false}
+{"departure_airport": "BNA", "arrival_airport": "MSY", "departure_date": "2026-03-06", "return_date": "2026-03-13", "adult_passengers":1, "cabin_class": "Wanna Get Away Plus", "routing": "direct", "round_trip": true}
+{"departure_airport": "FLL", "arrival_airport": "TPA", "departure_date": "2026-04-03", "adult_passengers":1, "cabin_class": "Anytime", "routing": "one_stop", "round_trip": false}
+{"departure_airport": "PHL", "arrival_airport": "PIT", "departure_date": "2026-05-01", "return_date": "2026-05-10", "adult_passengers":1, "cabin_class": "Basic", "routing": "one_stop", "round_trip": true}
