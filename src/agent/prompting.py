@@ -77,20 +77,25 @@ def get_tasks(
 
     ### TASK 1
     task1 = f"""
+# CONTEXT
+You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You are currently on the home page of an airline. There should be a form to search for flights.
+If you do not see a form to search for flights, immediately exit by using the "done" action with success=False. 
+    
 # GOAL
 Your goal is to search for **{flight_type}** flights from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}.
 
 # FLIGHT SEARCH CRITERIA
-- Trip Type: {flight_type}
-- Departure Airport Code: {flight_info["departure_airport"]}
-- Arrival Airport Code: {flight_info["arrival_airport"]}
-- Departure Date: {flight_info["departure_date"]}"""
+- **Trip Type**: {flight_type}
+- **Departure Airport Code**: {flight_info["departure_airport"]}
+- **Arrival Airport Code**: {flight_info["arrival_airport"]}
+- **Departure Date**: {flight_info["departure_date"]}"""
     if flight_info["round_trip"]:
-        task1 += f"\n- Return Date {flight_info['return_date']}"
+        task1 += f"\n- **Return Date** {flight_info['return_date']}"
     task1 += f"""
-- Number of Passengers: {flight_info["adult_passengers"]}
-- Routing Type: {routing_mapping[flight_info["routing"]]}
-- Cabin Class: {flight_info["cabin_class"]}
+- **Number of Passengers**: {flight_info["adult_passengers"]}
+- **Routing Type**: {routing_mapping[flight_info["routing"]]}
+- **Cabin Class**: {flight_info["cabin_class"]}
 
 # COMMON ISSUES
 - Some input fields may be pre-populated - clear them before typing.
@@ -100,9 +105,10 @@ Your goal is to search for **{flight_type}** flights from {flight_info["departur
 
 # VALIDATION STRATEGY
 Before clicking the button to submit your search query, use your screenshot of the page to verify that:
-1. The departure airport shows as "{flight_info["departure_airport"]}" 
-2. The arrival airport shows as "{flight_info["arrival_airport"]}"
-3. The departure date shows as "{flight_info["departure_date"]}"
+1. The trip type shows that you are searching for "{flight_type}" flights
+2. The departure airport shows as "{flight_info["departure_airport"]}" 
+3. The arrival airport shows as "{flight_info["arrival_airport"]}"
+4. The departure date shows as "{flight_info["departure_date"]}"
 """
     if flight_info["round_trip"]:
         task1 += f'4. The return date shows as "{flight_info["return_date"]}"'
@@ -118,6 +124,7 @@ You have successfully completed this task when you are presented with a list of 
 # CONTEXT
 You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
 You are currently on the page to select a departing flight from a list of available options.
+If you do not see a list of flight options, immediately exit by using the "done" action with success=False. 
 
 # GOAL
 Your goal is to review flight options and select the **cheapest** departing and returning flights that meet the following criteria:
@@ -131,7 +138,7 @@ Your goal is to review flight options and select the **cheapest** departing and 
 
 # COMMON ISSUES
 - Some airlines have the departing and returning flight selections on different pages. Verify that each flight matches the requirements before proceeding.
-- Some sites require clicking a button to proceed, such as a "Select Next Flight" or "Continue" button.
+- Some sites require clicking a button to confirm each selected flight, such as a "Select Next Flight" or "Continue" button.
 
 # SUCCESS CRITERIA
 You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth)
@@ -142,6 +149,7 @@ You have successfully completed this task when you reach a page asking for passe
 # CONTEXT
 You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
 You are currently on the page to select a departing flight from a list of available options.
+If you do not see a list of flight options, immediately exit by using the "done" action with success=False. 
 
 # GOAL
 Your goal is to review flight options and select the **cheapest** departing flight that meets the following criteria:
@@ -154,7 +162,7 @@ Your goal is to review flight options and select the **cheapest** departing flig
 3. If multiple flights have the same price, choose the one with better timing or fewer stops
 
 # COMMON ISSUES
-- Some sites require clicking a button to proceed, such as a "Select Next Flight" or "Continue" button.
+- Some sites require clicking a button to confirm your selected flight, such as a "Continue" or "Confirm Selection" button.
 
 # SUCCESS CRITERIA
 You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth)
@@ -162,7 +170,10 @@ You have successfully completed this task when you reach a page asking for passe
 
     task3 = f"""
 # CONTEXT
-You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. You are currently on the page to provide traveler information to the airline.
+You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You are currently on the page to provide traveler information to the airline.
+If you do not see a form requesting traveler information, immediately exit by using the "done" action with success=False. 
+
 
 # GOAL
 Your goal is to accurately populate and submit the form using the passenger information provided below. Note that not all fields will be required to submit the form. Only populate fields that are required.
@@ -187,7 +198,9 @@ You have successfully completed this task when you have submitted passenger info
 
     task4 = f"""
 # CONTEXT
-You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. You are currently on the page to provide payment information and complete your booking.
+You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You are currently on the page to provide payment information and complete your booking.
+If you do not see a form requesting payment information, immediately exit by using the "done" action with success=False. 
 
 # GOAL
 Your goal is to populate all requested billing information using the billing details provided below. 

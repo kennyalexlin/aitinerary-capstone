@@ -7,14 +7,14 @@ from datetime import datetime
 from browser_use import Agent
 from browser_use.llm import ChatGoogle
 from dotenv import load_dotenv
+from tqdm import tqdm
 
-from agent.controller import custom_controller
+from agent.controller import create_custom_controller
 from agent.prompting import get_initial_actions, get_tasks
 from agent.session import create_fresh_browser_session
-from agent.parse_v2 import filter_booking_controls, filter_interactive_fields
-from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
 
-EVALUATION_IDX = 1
+# from agent.parse_v2 import filter_booking_controls, filter_interactive_fields
+from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
 
 
 async def do_flight_booking(
@@ -23,6 +23,8 @@ async def do_flight_booking(
     user_billing_info: UserBillingInfo,
     user_preferences: UserPreferences = None,
     logs_path: str = "logs",
+    keep_alive: bool = True,
+    max_steps_per_task=30,
 ):
     """Kick off agentic flight booking process.
 
@@ -84,7 +86,7 @@ async def do_flight_booking(
     logging.info(f"TASK #4: FILL IN PAYMENT INFO\n{task4}")
 
     # initialize and kick off chromium browser session
-    browser_session = create_fresh_browser_session()
+    browser_session = create_fresh_browser_session(keep_alive=keep_alive)
     logging.info("Created fresh browser session")
     await browser_session.start()
     logging.info("Browser session initialized")
@@ -102,10 +104,10 @@ async def do_flight_booking(
 
     # step 1 - Search for flights
     agent = Agent(
-        controller=custom_controller,
+        controller=create_custom_controller(allow_request_assistance=False),
         task=task1,
         llm=llm,
-        initial_actions=get_initial_actions(site="southwest") + [{"filter_booking_controls": {}}],
+        initial_actions=get_initial_actions(site="southwest"),
         browser_session=browser_session,
         save_conversation_path=task1_logs_path,
         use_vision=True,
@@ -113,14 +115,14 @@ async def do_flight_booking(
         max_actions_per_step=2,
         generate_gif=task1_gif_path,
     )
-    await agent.run()
+    await agent.run(max_steps=max_steps_per_task)
 
     # step 2
     agent = Agent(
-        controller=custom_controller,
+        controller=create_custom_controller(allow_request_assistance=False),
         task=task2,
         llm=llm,
-        initial_actions = [{"filter_booking_controls": {}}],
+        # initial_actions = [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task2_logs_path,
         use_vision=True,
@@ -128,56 +130,36 @@ async def do_flight_booking(
         max_actions_per_step=2,
         generate_gif=task2_gif_path,
     )
-    await agent.run()
+    await agent.run(max_steps=max_steps_per_task)
 
     # step 3
     agent = Agent(
-        controller=custom_controller,
+        controller=create_custom_controller(allow_request_assistance=False),
         task=task3,
         llm=llm,
-        initial_actions = [{"filter_interactive_fields": {}}],
+        # initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task3_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
         generate_gif=task3_gif_path,
     )
-    await agent.run()
+    await agent.run(max_steps=max_steps_per_task)
 
     # step 4
     agent = Agent(
-        controller=custom_controller,
+        controller=create_custom_controller(allow_request_assistance=True),
         task=task4,
         llm=llm,
-        initial_actions = [{"filter_interactive_fields": {}}],
+        # initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task4_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
         generate_gif=task4_gif_path,
     )
-    await agent.run()
+    await agent.run(max_steps=max_steps_per_task)
 
-
-# flight_info = {
-#     "departure_code": "OAK",
-#     "arrival_code": "BOS",
-#     "departure_date": "2025-10-01",
-#     "return_date": "2025-10-15",
-#     "adult_passengers": 1,
-#     "round_trip": True,
-#     "cabin_class": "Wanna Get Away Plus",
-#     "routing": "one_stop",
-# }
-
-
-with open("src/evaluation/input_samples.jsonl", "r", encoding="utf-8") as f:
-    for idx, line in enumerate(f, 1):
-        if idx == EVALUATION_IDX:
-            line = line.strip()
-            flight_info = json.loads(line)
-
-logs_path = f"logs/input_sample_{EVALUATION_IDX}"
 
 # define demo UserInfo
 user_info_ls = [
@@ -210,12 +192,25 @@ user_billing_info = {
 
 
 async def main():
-    await do_flight_booking(
-        flight_info=flight_info,
-        user_info_ls=user_info_ls,
-        user_billing_info=user_billing_info,
-        logs_path=logs_path,
-    )
+    for eval_idx in range(1):
+        print("===========================================")
+        print(f"BEGINNING EVALUATION INPUT #{eval_idx}")
+        print("===========================================")
+        with open("src/evaluation/input_samples.jsonl", "r", encoding="utf-8") as f:
+            for idx, line in enumerate(f, 0):
+                if idx == eval_idx:
+                    line = line.strip()
+                    flight_info = json.loads(line)
+
+        for run_idx in tqdm(range(2)):
+            logs_path = f"logs/input_sample_{eval_idx}"
+
+            await do_flight_booking(
+                flight_info=flight_info,
+                user_info_ls=user_info_ls,
+                user_billing_info=user_billing_info,
+                logs_path=logs_path,
+            )
 
 
 if __name__ == "__main__":

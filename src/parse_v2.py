@@ -1,28 +1,26 @@
 import asyncio
-import json
-from datetime import datetime
 import sys
-sys.stdout.reconfigure(encoding='utf-8')
+
+sys.stdout.reconfigure(encoding="utf-8")
 import os
-import platform
 import re
 
 # Set up browser-use config directory before importing
-config_dir = os.path.expanduser('~/Desktop/aitinerary/browser_config')
+config_dir = os.path.expanduser("~/Desktop/aitinerary/browser_config")
 os.makedirs(config_dir, exist_ok=True)
-os.environ['BROWSER_USE_CONFIG_DIR'] = config_dir
+os.environ["BROWSER_USE_CONFIG_DIR"] = config_dir
 
 # Now safely import browser-use
 try:
-    from browser_use import Agent, BrowserSession, Controller, ActionResult
+    from browser_use import ActionResult, Agent, BrowserSession, Controller
+
     print("Successfully imported browser-use")
 except Exception as e:
     print(f"Still having import issues: {e}")
     sys.exit(1)
 
 from dotenv import load_dotenv
-from browser_use.llm import ChatAnthropic
-from pydantic import BaseModel
+
 BrowserSession.capture_element_screenshots = False
 from browser_use.llm import ChatGoogle
 
@@ -84,6 +82,7 @@ Once on a URL containing '/traveler/choose-travelers' or '/booking/passenger':
 
 controller = Controller()
 
+
 @controller.action("Return flight booking controls")
 async def filter_booking_controls() -> ActionResult:
     js = r"""
@@ -137,17 +136,16 @@ async def filter_interactive_fields() -> ActionResult:
     return ActionResult(js=js)
 
 
-
 async def main():
     # pre-agent: setup a valid session (e.g., login/search) to get to booking page
     setup_agent = Agent(
         task=task_setup,
         llm=llm,
         initial_actions=[
-    {"go_to_url": {"url": "https://www.southwest.com","new_tab": False}}
-  ],
-        message_context = message_pre_agent,
-        use_vision=True
+            {"go_to_url": {"url": "https://www.southwest.com", "new_tab": False}}
+        ],
+        message_context=message_pre_agent,
+        use_vision=True,
     )
     try:
         setup_result = await setup_agent.run()
@@ -158,7 +156,7 @@ async def main():
     content = setup_result.extracted_content()
     # if it's a list, pull out the single URL string
     extract = content[0] if isinstance(content, list) else content
-    match = re.search(r'https?://\S+', extract)
+    match = re.search(r"https?://\S+", extract)
     if match:
         website = match.group(0)
     else:
@@ -169,18 +167,23 @@ async def main():
     main_agent = Agent(
         task="Filter traveler info page DOM and list interactive fields.",
         initial_actions=[
-            {"go_to_url": {"url": website, "new_tab": False}}], # page should already be traveler info
+            {"go_to_url": {"url": website, "new_tab": False}}
+        ],  # page should already be traveler info
         llm=llm,
         controller=controller,
         message_context=message_context,
-        use_vision=True
+        use_vision=True,
     )
     try:
         main_result = await main_agent.run()
         fields = main_result.extracted_content()
     except UnicodeEncodeError:
-        fields = main_result.extracted_content().encode('ascii','ignore').decode('ascii')
+        fields = (
+            main_result.extracted_content().encode("ascii", "ignore").decode("ascii")
+        )
 
     print("🧩 Interactive fields found:", fields)
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())

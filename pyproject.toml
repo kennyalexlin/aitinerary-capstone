@@ -8,7 +8,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13,<4.0"
 dependencies = [
-    "browser-use>=0.5.5",
+    "browser-use>=0.5.6",
     "fastapi>=0.116.1",
     "playwright>=1.53.0",
     "pydantic>=2.5.0",

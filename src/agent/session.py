@@ -35,7 +35,7 @@ def get_screen_dimensions():
     return primary_monitor.width, primary_monitor.height
 
 
-def create_fresh_browser_session():
+def create_fresh_browser_session(keep_alive=True):
     """Create a completely fresh browser session with aggressive cache clearing"""
     # Clear browser-use's own cache first
     clear_browseruse_cache()
@@ -52,7 +52,7 @@ def create_fresh_browser_session():
     browser_session = BrowserSession(
         headless=False,
         viewport_expansion=0,  # websites have anti-automation blockers
-        keep_alive=True,  # Don't persist between runs
+        keep_alive=keep_alive,  # Don't persist between runs
         minimum_wait_page_load_time=0.5,
         storage_state=None,  # No stored cookies/localStorage
         window_size=window_size,
