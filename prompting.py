@@ -94,7 +94,7 @@ In particular, search for flights that match the following criteria:
 You will receive a list of DOM controls with fields: index, tag, text.
 Select the correct input fields for the above criteria and sequentially:
 1. click the input (by index),
-2. type in the given value,
+2. use the above criteria to search for flights,
 
 NOTE: Depending on which airline you are booking with, not every field will be applicable when searching for flights. If one or more criteria isn't requested, you may proceed without filtering on it.
 For example, you do not need to select Cabin Class or Routing Type for Southwest to search for flights. 
