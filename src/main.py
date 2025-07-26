@@ -14,14 +14,13 @@ from agent.prompting import get_initial_actions, get_tasks
 from agent.session import create_fresh_browser_session
 
 # from agent.parse_v2 import filter_booking_controls, filter_interactive_fields
-from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
+from models.chat import FlightInfo, UserBillingInfo, UserInfo
 
 
 async def do_flight_booking(
     flight_info: FlightInfo,
     user_info_ls: list[UserInfo],
     user_billing_info: UserBillingInfo,
-    user_preferences: UserPreferences = None,
     logs_path: str = "logs",
     keep_alive: bool = True,
     max_steps_per_task=30,
@@ -96,9 +95,10 @@ async def do_flight_booking(
     <critical_rules>
     You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
     Below is a list of CRITICAL rules that must always be followed. Failure to adhere to them will lead to unstable page interactions that may make accomplishing your goal impossible.
-    1. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
-    2. Whenever you use the scroll action, prefer to scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content. 
-    3. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
+    1. Before using input_text, ALWAYS double-check that the target element is empty before doing so.
+    2. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
+    3. Whenever you use the scroll action, prefer to scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content. 
+    4. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
     </critical_rules>
     """
 
@@ -112,7 +112,7 @@ async def do_flight_booking(
         save_conversation_path=task1_logs_path,
         use_vision=True,
         extended_system_message=extended_system_message,
-        max_actions_per_step=2,
+        max_actions_per_step=1,
         generate_gif=task1_gif_path,
     )
     await agent.run(max_steps=max_steps_per_task)
@@ -127,7 +127,7 @@ async def do_flight_booking(
         save_conversation_path=task2_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
-        max_actions_per_step=2,
+        max_actions_per_step=1,
         generate_gif=task2_gif_path,
     )
     await agent.run(max_steps=max_steps_per_task)

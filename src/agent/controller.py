@@ -38,3 +38,5 @@ def create_custom_controller(allow_request_assistance: bool = False) -> Controll
             return ActionResult(
                 extracted_content=f'The user has provided assistance. The page may have changed from the last time it has been seen. Here is what the user was asked to do: "{request_msg}"'
             )
+
+    return custom_controller

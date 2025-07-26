@@ -1,13 +1,3 @@
-import sys
-
-# TODO: no longer need to add this to path once we re-organize project
-# replace this with the absolute path to the pydantic data models file
-sys.path.append(
-    "/Users/kennyalexlin/Desktop/MIDS/W210/aitinerary-capstone/input_handling_extraction/fastapi_app/models"
-)
-from chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
-
-
 def get_initial_actions(site: str) -> list[dict]:
     """Returns a list of initial actions for the agent to take"""
     actions = []
@@ -30,11 +20,10 @@ def get_initial_actions(site: str) -> list[dict]:
 
 
 def get_tasks(
-    flight_info: FlightInfo,
-    user_info_ls: list[UserInfo],
-    user_billing_info: UserBillingInfo,
-    user_preferences: UserPreferences = None,
-) -> tuple[str]:
+    flight_info: dict,
+    user_info_ls: list[dict],
+    user_billing_info: dict,
+) -> tuple[str, str, str, str]:
     """
     Injects user context into a series of prompt templates for tasks 1 - 4
 
@@ -55,7 +44,7 @@ def get_tasks(
 
     flight_type = "round-trip" if flight_info["round_trip"] else "one-way"
 
-    def fmt_user_info(user_info: UserInfo) -> str:
+    def fmt_user_info(user_info: dict) -> str:
         """formats a UserInfo object for use by the agent"""
 
         ret = ""
@@ -65,7 +54,7 @@ def get_tasks(
             ret += f"- {key.replace('_', ' ').title()}: {value}\n"
         return ret
 
-    def fmt_user_billing_info(user_billing_info: UserBillingInfo) -> str:
+    def fmt_user_billing_info(user_billing_info: dict) -> str:
         """formats billing info for use by the agent"""
 
         ret = ""
@@ -98,7 +87,7 @@ Your goal is to search for **{flight_type}** flights from {flight_info["departur
 - **Cabin Class**: {flight_info["cabin_class"]}
 
 # COMMON ISSUES
-- Some input fields may be pre-populated - clear them before typing.
+- Some input fields may be pre-populated - ALWAYS use clear_text before using input_text to avoid issues.
 - Depending on the airline, not every field will be applicable when searching for flights. If the search form doesn't accept one or more of the FLIGHT SEARCH CRITERIA, ignore it and proceed. For example, Southwest does not require Cabin Class or Routing Type to search for flights. 
 - Date pickers may default to today's date. Always verify that the correct departure and return dates (if applicable) are selected before proceeding.
 - You will need to click a button to actually submit your search query. Common labels for this button are "Search Flights" or "Find Flights". Make sure that you are using the correct button, as some promotional buttons (e.g. "Book Now") will navigate you away from the search page.
@@ -141,7 +130,8 @@ Your goal is to review flight options and select the **cheapest** departing and 
 - Some sites require clicking a button to confirm each selected flight, such as a "Select Next Flight" or "Continue" button.
 
 # SUCCESS CRITERIA
-You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth)
+You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth).
+This page will **explicitly** have the header **Passenger Information**. If you do not see it, continue with the booking process until you do so.
 """
 
     else:
@@ -165,7 +155,8 @@ Your goal is to review flight options and select the **cheapest** departing flig
 - Some sites require clicking a button to confirm your selected flight, such as a "Continue" or "Confirm Selection" button.
 
 # SUCCESS CRITERIA
-You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth)
+You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth).
+This page will **explicitly** have the header **Passenger Information**. If you do not see it, continue with the booking process until you do so.
 """
 
     task3 = f"""
