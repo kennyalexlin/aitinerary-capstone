@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from agent.controller import custom_controller
 from agent.prompting import get_initial_actions, get_tasks
 from agent.session import create_fresh_browser_session
+from agent.parse_v2 import filter_booking_controls, filter_interactive_fields
 from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
 
 
@@ -56,7 +57,7 @@ async def do_flight_booking(
     logging.info(f"Logs will be saved to {run_logs_path}")
 
     # define model to use
-    model = "gemini-2.0-flash"
+    model = "gemini-2.5-flash-lite-preview-06-17"
     # model = 'gpt-4.1-mini'
     llm = ChatGoogle(model=model, temperature=0.0)
     # llm = ChatOpenAI(model=model, temperature=0)
@@ -96,7 +97,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task1,
         llm=llm,
-        initial_actions=get_initial_actions(site="southwest"),
+        initial_actions=get_initial_actions(site="southwest") + [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task1_logs_path,
         use_vision=True,
@@ -109,6 +110,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task2,
         llm=llm,
+        initial_actions = [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task2_logs_path,
         use_vision=True,
@@ -121,6 +123,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task3,
         llm=llm,
+        initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task3_logs_path,
         use_vision=True,
@@ -133,6 +136,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task4,
         llm=llm,
+        initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task4_logs_path,
         use_vision=True,
