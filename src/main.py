@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from agent.controller import custom_controller
 from agent.prompting import get_initial_actions, get_tasks
 from agent.session import create_fresh_browser_session
+from agent.parse_v2 import filter_booking_controls, filter_interactive_fields
 from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
 
 EVALUATION_IDX = 1
@@ -104,7 +105,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task1,
         llm=llm,
-        initial_actions=get_initial_actions(site="southwest"),
+        initial_actions=get_initial_actions(site="southwest") + [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task1_logs_path,
         use_vision=True,
@@ -119,6 +120,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task2,
         llm=llm,
+        initial_actions = [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task2_logs_path,
         use_vision=True,
@@ -133,6 +135,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task3,
         llm=llm,
+        initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task3_logs_path,
         use_vision=True,
@@ -146,6 +149,7 @@ async def do_flight_booking(
         controller=custom_controller,
         task=task4,
         llm=llm,
+        initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task4_logs_path,
         use_vision=True,
