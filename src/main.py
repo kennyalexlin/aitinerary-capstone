@@ -2,10 +2,11 @@ import asyncio
 import json
 import logging
 import os
+import time
 from datetime import datetime
 
 from browser_use import Agent
-from browser_use.llm import ChatGoogle
+from browser_use.llm import ChatOpenAI, ChatGoogle
 from dotenv import load_dotenv
 from tqdm import tqdm
 
@@ -68,7 +69,7 @@ async def do_flight_booking(
     # define model to use
     model = "gemini-2.0-flash"
     # model = "gpt-4.1-mini"
-    llm = ChatGoogle(model=model, temperature=0.0)
+    llm = ChatGoogle(model=model, temperature=0)
     # llm = ChatOpenAI(model=model, temperature=0)
     logging.info(f"Initialized LLM with model {model}")
 
@@ -85,7 +86,7 @@ async def do_flight_booking(
     logging.info(f"TASK #4: FILL IN PAYMENT INFO\n{task4}")
 
     # initialize and kick off chromium browser session
-    browser_session = create_fresh_browser_session(keep_alive=keep_alive)
+    browser_session = create_fresh_browser_session()
     logging.info("Created fresh browser session")
     await browser_session.start()
     logging.info("Browser session initialized")
@@ -95,10 +96,9 @@ async def do_flight_booking(
     <critical_rules>
     You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
     Below is a list of CRITICAL rules that must always be followed. Failure to adhere to them will lead to unstable page interactions that may make accomplishing your goal impossible.
-    1. Before using input_text, ALWAYS double-check that the target element is empty before doing so.
-    2. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
-    3. Whenever you use the scroll action, prefer to scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content. 
-    4. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
+    1. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
+    2. Whenever you use the scroll action, always scroll in half-page increments (num_pages = 0.5) or less. Scrolling a full page or more can accidentally obscure content. 
+    3. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
     </critical_rules>
     """
 
@@ -112,7 +112,7 @@ async def do_flight_booking(
         save_conversation_path=task1_logs_path,
         use_vision=True,
         extended_system_message=extended_system_message,
-        max_actions_per_step=1,
+        max_actions_per_step=2,
         generate_gif=task1_gif_path,
     )
     await agent.run(max_steps=max_steps_per_task)
@@ -127,7 +127,7 @@ async def do_flight_booking(
         save_conversation_path=task2_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
-        max_actions_per_step=1,
+        max_actions_per_step=2,
         generate_gif=task2_gif_path,
     )
     await agent.run(max_steps=max_steps_per_task)
@@ -159,6 +159,8 @@ async def do_flight_booking(
         generate_gif=task4_gif_path,
     )
     await agent.run(max_steps=max_steps_per_task)
+
+    await browser_session.kill()
 
 
 # define demo UserInfo
@@ -192,7 +194,7 @@ user_billing_info = {
 
 
 async def main():
-    for eval_idx in range(1):
+    for eval_idx in range(7, 8):
         print("===========================================")
         print(f"BEGINNING EVALUATION INPUT #{eval_idx}")
         print("===========================================")
@@ -210,7 +212,12 @@ async def main():
                 user_info_ls=user_info_ls,
                 user_billing_info=user_billing_info,
                 logs_path=logs_path,
+                keep_alive=False,
             )
+            print("===========================================")
+            print("DONE WITH ONE ITERATION. SLEEPING FOR 30 SECONDS.")
+            print("===========================================")
+            time.sleep(30)
 
 
 if __name__ == "__main__":

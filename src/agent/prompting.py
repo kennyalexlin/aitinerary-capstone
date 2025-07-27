@@ -72,9 +72,13 @@ You are currently on the home page of an airline. There should be a form to sear
 If you do not see a form to search for flights, immediately exit by using the "done" action with success=False. 
     
 # GOAL
-Your goal is to search for **{flight_type}** flights from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}.
+Your goal is to search for **{flight_type}** flights from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]} using the form.
+If done correctly, submitting the form will take you to a page that lists different possible departing flights by time, price, and other characteristics.
+The button to submit your search query will be labeled "Search Flights" or something similar.
+After clicking the button to submit your search query, wait for the page to load and verify you have reached this page using the DOM and your screenshot of the page.
+Do NOT indicate success until you have reached the page that lists possible departing flights.
 
-# FLIGHT SEARCH CRITERIA
+## FLIGHT SEARCH CRITERIA
 - **Trip Type**: {flight_type}
 - **Departure Airport Code**: {flight_info["departure_airport"]}
 - **Arrival Airport Code**: {flight_info["arrival_airport"]}
@@ -86,13 +90,7 @@ Your goal is to search for **{flight_type}** flights from {flight_info["departur
 - **Routing Type**: {routing_mapping[flight_info["routing"]]}
 - **Cabin Class**: {flight_info["cabin_class"]}
 
-# COMMON ISSUES
-- Some input fields may be pre-populated - ALWAYS use clear_text before using input_text to avoid issues.
-- Depending on the airline, not every field will be applicable when searching for flights. If the search form doesn't accept one or more of the FLIGHT SEARCH CRITERIA, ignore it and proceed. For example, Southwest does not require Cabin Class or Routing Type to search for flights. 
-- Date pickers may default to today's date. Always verify that the correct departure and return dates (if applicable) are selected before proceeding.
-- You will need to click a button to actually submit your search query. Common labels for this button are "Search Flights" or "Find Flights". Make sure that you are using the correct button, as some promotional buttons (e.g. "Book Now") will navigate you away from the search page.
-
-# VALIDATION STRATEGY
+## VALIDATION STRATEGY
 Before clicking the button to submit your search query, use your screenshot of the page to verify that:
 1. The trip type shows that you are searching for "{flight_type}" flights
 2. The departure airport shows as "{flight_info["departure_airport"]}" 
@@ -100,85 +98,97 @@ Before clicking the button to submit your search query, use your screenshot of t
 4. The departure date shows as "{flight_info["departure_date"]}"
 """
     if flight_info["round_trip"]:
-        task1 += f'4. The return date shows as "{flight_info["return_date"]}"'
+        task1 += f'5. The return date shows as "{flight_info["return_date"]}"'
     task1 += """
 
-# SUCCESS CRITERIA
-You have successfully completed this task when you are presented with a list of departing flights, times, and prices.
+# COMMON ISSUES
+- Date pickers can be finnicky. When populating the departure and return date, use the input_text action first. Provide the date in the form "MMDD". Then, select the desired date in the picker.
+- Some input fields may be pre-populated - ALWAYS use clear_text before using input_text to avoid issues.
+- Depending on the airline, not every field will be applicable when searching for flights. If the search form doesn't accept one or more of the FLIGHT SEARCH CRITERIA, ignore it and proceed. For example, Southwest does not require Cabin Class or Routing Type to search for flights. 
+- Date pickers may default to today's date. Always verify that the correct departure and return dates (if applicable) are selected before proceeding.
+- You will need to click a button to actually submit your search query. Common labels for this button are "Search Flights" or "Find Flights". Make sure that you are using the correct button, as some promotional buttons (e.g. "Book Now", "Learn More") will navigate you away from the search page.
 """
 
     ### TASK 2
     if flight_info["round_trip"]:
         task2 = f"""
 # CONTEXT
-You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
-You are currently on the page to select a departing flight from a list of available options.
-If you do not see a list of flight options, immediately exit by using the "done" action with success=False. 
+You are in the process of booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You should currently be on the page to select a departing flight from a list of available options.
+If you do not see a list of different options for flight times, prices, and cabin classes, immediately exit by using the "done" action with success=False. 
 
 # GOAL
-Your goal is to review flight options and select the **cheapest** departing and returning flights that meet the following criteria:
-- Routing Type: {routing_mapping[flight_info["routing"]]}
-- Cabin Class: {flight_info["cabin_class"]}
+Your overall goal is to continue with the booking process until you reach a page that requests Passenger or Traveler Information such as First Name, Last Name, and Date of Birth.
+There are 3 general steps for this:
+1. Review available flight options and select the **cheapest** departing flight that meets the following criteria:
+    - Routing Type: {routing_mapping[flight_info["routing"]]}
+    - Cabin Class: {flight_info["cabin_class"]}
+2. Review available flight options and select the **cheapest** returning flight that meets the same criteria.
+3. Confirm your selections and navigate through any additional confirmation pages until you reach the Passenger or Traveler Information page.
 
-# SELECTION STRATEGY
+For each step, you will need to click some kind of button to confirm your selection or proceed to the next page. Typical button labels include "Select Next Flight" and "Continue". 
+You may need to scroll to find this button.
+For example, after selecting your departing flight, you will need to scroll down and select "Select Next Flight" in order to proceed to the page for selecting your returning flight.
+
+Do NOT indicate success until you have reached the page requesting Passenger or Traveler information. 
+Confirm that you have reached this page using the DOM and your screenshot of the page.
+
+## SELECTION STRATEGY
+When selecting a departing and returning flight, use the following strategy:
 1. Sort flights by price (lowest to highest) if the option is available
 2. Look for the cheapest option that meets cabin and routing requirements
-3. If multiple flights have the same price, choose the one with better timing or fewer stops
+3. If multiple flights have the same price, you may pick any of them.
 
 # COMMON ISSUES
-- Some airlines have the departing and returning flight selections on different pages. Verify that each flight matches the requirements before proceeding.
-- Some sites require clicking a button to confirm each selected flight, such as a "Select Next Flight" or "Continue" button.
-
-# SUCCESS CRITERIA
-You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth).
-This page will **explicitly** have the header **Passenger Information**. If you do not see it, continue with the booking process until you do so.
+- Some airlines have the departing and returning flight selections on different pages. If so, the first page will be for the departing flight and the second page will be for the returning flight.
+- Some sites require clicking a button to confirm your selections, such as a "Select Next Flight" or "Continue" button. This button may also not be visible without scrolling on the page.
 """
 
     else:
         task2 = f"""
 # CONTEXT
-You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
-You are currently on the page to select a departing flight from a list of available options.
-If you do not see a list of flight options, immediately exit by using the "done" action with success=False. 
+You are in the process of booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You should currently be on the page to select a departing flight from a list of available options.
+If you do not see a list of different options for flight times, prices, and cabin classes, immediately exit by using the "done" action with success=False. 
 
 # GOAL
-Your goal is to review flight options and select the **cheapest** departing flight that meets the following criteria:
-- Routing Type: {routing_mapping[flight_info["routing"]]}
-- Cabin Class: {flight_info["cabin_class"]}
+Your overall goal is to continue with the booking process until you reach a page that requests Passenger or Traveler Information such as First Name, Last Name, and Date of Birth.
+There are 2 general steps for this:
+1. Review available flight options and select the **cheapest** departing flight that meets the following criteria:
+    - Routing Type: {routing_mapping[flight_info["routing"]]}
+    - Cabin Class: {flight_info["cabin_class"]}
+2. Confirm your selection and navigate through any additional confirmation pages until you reach the Passenger or Traveler Information page.
 
-# SELECTION STRATEGY
+Do NOT indicate success until you have reached the page requesting Passenger or Traveler information. 
+Confirm that you have reached this page using the DOM and your screenshot of the page.
+
+## SELECTION STRATEGY
+When selecting a departing flight, use the following strategy:
 1. Sort flights by price (lowest to highest) if the option is available
 2. Look for the cheapest option that meets cabin and routing requirements
-3. If multiple flights have the same price, choose the one with better timing or fewer stops
+3. If multiple flights have the same price, you may pick any of them.
 
 # COMMON ISSUES
-- Some sites require clicking a button to confirm your selected flight, such as a "Continue" or "Confirm Selection" button.
-
-# SUCCESS CRITERIA
-You have successfully completed this task when you reach a page asking for passenger information (e.g. First Name, Last Name, Date of Birth).
-This page will **explicitly** have the header **Passenger Information**. If you do not see it, continue with the booking process until you do so.
+- Some sites require clicking a button to confirm your selections, such as a "Select Next Flight" or "Continue" button. This button may also not be visible without scrolling on the page.
 """
 
     task3 = f"""
 # CONTEXT
-You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You are in the process of booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
 You are currently on the page to provide traveler information to the airline.
 If you do not see a form requesting traveler information, immediately exit by using the "done" action with success=False. 
 
 
 # GOAL
-Your goal is to accurately populate and submit the form using the passenger information provided below. Note that not all fields will be required to submit the form. Only populate fields that are required.
+Your goal is to accurately populate and submit the form using the passenger information provided below. 
+Once you have done so, continue the booking process until you reach a page that requests Billing or Payment Information.
+
+Do NOT indicate success until you have reached the page requesting Billing or Payment information. Confirm that you have reached this page using the DOM and your screenshot of the page.
 
 # COMMON ISSUES
 - Depending on which airline you are booking with, not every piece of passenger info will be required to submit the form. Only populate fields the form requires. For example, Southwest may not require each passenger's address.
-- You may need to expand some page elements in order to access all form elements.
+- You may need to expand some page elements in order to access all form elements
 - If there are form elements that are not visible in the viewport, use the scroll action.
-
-# VERIFICATION STRATEGY
-Before proceeding, use your screenshot of the page to verify that all required passenger information has been entered correctly.
-
-# SUCCESS CRITERIA
-You have successfully completed this task when you have submitted passenger information and reach a page that requests payment information.
 
 # PASSENGER INFO
 """
@@ -189,7 +199,7 @@ You have successfully completed this task when you have submitted passenger info
 
     task4 = f"""
 # CONTEXT
-You are booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
+You are in the process of booking a {flight_type} flight from {flight_info["departure_airport"]} to {flight_info["arrival_airport"]}. 
 You are currently on the page to provide payment information and complete your booking.
 If you do not see a form requesting payment information, immediately exit by using the "done" action with success=False. 
 
@@ -205,10 +215,8 @@ Examples include:
 - "Submit Payment"
 - "Book Flight"
 
-# SUCCESS CONDITION
+# SUCCESS CRITERIA
 You have successfully completed this task once you have filled in all required fields accurately. 
-
-Verify all required billing information and request assistance from the user with the request_msg: "I have populated your payment information. Please review it, correct any errors, and complete the booking process."
 
 # BILLING INFO
 {fmt_user_billing_info(user_billing_info)}

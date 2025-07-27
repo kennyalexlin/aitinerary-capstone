@@ -5,8 +5,8 @@ from pathlib import Path
 import screeninfo
 from browser_use import BrowserSession
 
-DEFAULT_WINDOW_WIDTH = 1440
-DEFAULT_WINDOW_HEIGHT = 900
+DEFAULT_WINDOW_WIDTH = 1920
+DEFAULT_WINDOW_HEIGHT = 1080
 
 
 def clear_browseruse_cache():
@@ -35,7 +35,7 @@ def get_screen_dimensions():
     return primary_monitor.width, primary_monitor.height
 
 
-def create_fresh_browser_session(keep_alive=True):
+def create_fresh_browser_session():
     """Create a completely fresh browser session with aggressive cache clearing"""
     # Clear browser-use's own cache first
     clear_browseruse_cache()
@@ -51,8 +51,8 @@ def create_fresh_browser_session(keep_alive=True):
     # Configure browser session with maximum freshness
     browser_session = BrowserSession(
         headless=False,
-        viewport_expansion=0,  # websites have anti-automation blockers
-        keep_alive=keep_alive,  # Don't persist between runs
+        # viewport_expansion=0,  # websites have anti-automation blockers
+        keep_alive=True,
         minimum_wait_page_load_time=0.5,
         storage_state=None,  # No stored cookies/localStorage
         window_size=window_size,
