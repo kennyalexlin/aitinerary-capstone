@@ -64,6 +64,11 @@ async def do_flight_booking(
     task2_gif_path = os.path.join(run_logs_path, "task2.gif")
     task3_gif_path = os.path.join(run_logs_path, "task3.gif")
     task4_gif_path = os.path.join(run_logs_path, "task4.gif")
+
+    task1_usage_path = os.path.join(run_logs_path, "task1.json")
+    task2_usage_path = os.path.join(run_logs_path, "task2.json")
+    task3_usage_path = os.path.join(run_logs_path, "task3.json")
+    task4_usage_path = os.path.join(run_logs_path, "task4.json")
     logging.info(f"Logs will be saved to {run_logs_path}")
 
     # define model to use
@@ -118,6 +123,15 @@ async def do_flight_booking(
     )
     await agent.run(max_steps=max_steps_per_task)
 
+    print("========================")
+    usage = agent.token_cost_service.get_usage_tokens_for_model(model)
+    data = usage.model_dump()
+    # Write to JSON file
+    with open(task1_usage_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(usage)
+    print("========================")
+
     # step 2
     agent = Agent(
         controller=create_custom_controller(allow_request_assistance=False),
@@ -133,6 +147,15 @@ async def do_flight_booking(
     )
     await agent.run(max_steps=max_steps_per_task)
 
+    print("========================")
+    usage = agent.token_cost_service.get_usage_tokens_for_model(model)
+    data = usage.model_dump()
+    # Write to JSON file
+    with open(task2_usage_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(usage)
+    print("========================")
+
     # step 3
     agent = Agent(
         controller=create_custom_controller(allow_request_assistance=False),
@@ -147,6 +170,15 @@ async def do_flight_booking(
     )
     await agent.run(max_steps=max_steps_per_task)
 
+    print("========================")
+    usage = agent.token_cost_service.get_usage_tokens_for_model(model)
+    data = usage.model_dump()
+    # Write to JSON file
+    with open(task3_usage_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(usage)
+    print("========================")
+
     # step 4
     agent = Agent(
         controller=create_custom_controller(allow_request_assistance=True),
@@ -160,6 +192,15 @@ async def do_flight_booking(
         generate_gif=task4_gif_path,
     )
     await agent.run(max_steps=max_steps_per_task)
+
+    print("========================")
+    usage = agent.token_cost_service.get_usage_tokens_for_model(model)
+    data = usage.model_dump()
+    # Write to JSON file
+    with open(task4_usage_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    print(usage)
+    print("========================")
 
     await browser_session.kill()
 
@@ -209,7 +250,7 @@ async def main():
                     flight_info = json.loads(line)
 
         for run_idx in tqdm(range(2)):
-            logs_path = f"logs2/input_sample_{eval_idx}"
+            logs_path = f"logs/input_sample_{eval_idx}"
 
             await do_flight_booking(
                 flight_info=flight_info,
