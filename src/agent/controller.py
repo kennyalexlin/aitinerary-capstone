@@ -21,6 +21,16 @@ def create_custom_controller(allow_request_assistance: bool = False) -> Controll
             extracted_content=f"Cleared text in text input element {index}"
         )
 
+    @custom_controller.action(
+        "Close a popover element that is currently open and obscuring page content. Examples of popovers include date pickers and dropdown panels."
+    )
+    async def close_selected_popover(browser_session: BrowserSession) -> ActionResult:
+        page = await browser_session.get_current_page()
+        await page.keyboard.press("Escape")
+        return ActionResult(
+            extracted_content="Closed an active popover that was obscuring page content."
+        )
+
     if allow_request_assistance:
 
         @custom_controller.action(

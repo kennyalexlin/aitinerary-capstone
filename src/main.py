@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 
 from browser_use import Agent
-from browser_use.llm import ChatOpenAI, ChatGoogle
+from browser_use.llm import ChatGoogle
 from dotenv import load_dotenv
 from tqdm import tqdm
 
@@ -96,9 +96,10 @@ async def do_flight_booking(
     <critical_rules>
     You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
     Below is a list of CRITICAL rules that must always be followed. Failure to adhere to them will lead to unstable page interactions that may make accomplishing your goal impossible.
-    1. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
-    2. Whenever you use the scroll action, always scroll in half-page increments (num_pages = 0.5) or less. Scrolling a full page or more can accidentally obscure content. 
-    3. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
+    1. After interacting with any date picker, dropdown, or other popover, you MUST IMMEDIATELY use the close_selected_popover action before taking any other action. Use the wait action for 1 second after closing to verify the popover is gone. Do not proceed until you confirm the page is in a clean state.
+    2. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
+    3. Whenever you use the scroll action, always scroll in half-page increments (num_pages = 0.5) or less. Scrolling a full page or more can accidentally obscure content. 
+    4. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
     </critical_rules>
     """
 
@@ -176,6 +177,9 @@ user_info_ls = [
         "country": "USA",
         "home_address": "2850 Kelvin Ave Apt 123, Irvine, CA 92614",
         "passport_number": None,
+        "redress_number": None,
+        "known_traveler_number": None,
+        "rewards_number": None,
     }
 ]
 
@@ -194,7 +198,7 @@ user_billing_info = {
 
 
 async def main():
-    for eval_idx in range(7, 8):
+    for eval_idx in range(0, 5):
         print("===========================================")
         print(f"BEGINNING EVALUATION INPUT #{eval_idx}")
         print("===========================================")
@@ -205,7 +209,7 @@ async def main():
                     flight_info = json.loads(line)
 
         for run_idx in tqdm(range(2)):
-            logs_path = f"logs/input_sample_{eval_idx}"
+            logs_path = f"logs2/input_sample_{eval_idx}"
 
             await do_flight_booking(
                 flight_info=flight_info,
