@@ -73,33 +73,6 @@ async def filter_booking_controls() -> ActionResult:
         boundingBox: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
       };
     });
-    """
-    return ActionResult(js=js)
-
-@custom_controller.action("Filter for DOM elements that are only user-interaction fields, such as typable, focusable, selectable/dropdowns.")
-async def filter_interactive_fields() -> ActionResult:
-    js = r"""
-    const needed = ["one-way","round-trip","depart","return","find flights","select","continue","next"];
-    const els = Array.from(document.querySelectorAll("button, a, div, span"));
-    const controls = [];
-    els.forEach(el => {
-      const text = (el.innerText||el.getAttribute("aria-label")||"").trim();
-      const lower = text.toLowerCase();
-      if (needed.some(k => lower.includes(k)) || /\$\s*\d+/.test(text)) {
-        controls.push({
-          tag: el.tagName,
-          text: text,
-          price: (/\$\s*\d+/.exec(text) || [null])[0],
-          selector: el.id
-            ? `#${el.id}`
-            : el.getAttribute("data-testid")
-              ? `${el.tagName.toLowerCase()}[data-testid="${el.getAttribute("data-testid")}"]`
-              : el.className
-                ? `${el.tagName.toLowerCase()}.${el.className.split(" ").join(".")}`
-                : el.tagName.toLowerCase()
-        });
-      }
-    });
     // popup controls
     const popups = Array.from(document.querySelectorAll("button, a")).filter(el => {
       const t = (el.innerText||"").toLowerCase();
@@ -113,21 +86,60 @@ async def filter_interactive_fields() -> ActionResult:
     """
     return ActionResult(js=js)
 
-@custom_controller.action("Filter for stored indexes in the DOM tree that are only about booking the trip, such as filling in dates, airport codes, roundtrip/one-way, etc, as well as action buttons to proceed to subsequent pages.")
+@custom_controller.action("Filter for DOM elements that are only user-interaction fields, such as typable, focusable, selectable/dropdowns.")
+async def filter_interactive_fields() -> ActionResult:
+    js = r"""
+    function getName(el) {
+      if (el.ariaLabel) return el.ariaLabel;
+      const abz = el.getAttribute('aria-labelledby');
+      if (abz) return abz.split(' ').map(id => document.getElementById(id)?.innerText).join(' ');
+      if (el.labels?.length) return Array.from(el.labels).map(l => l.innerText).join(' ');
+      if (el.placeholder) return el.placeholder;
+      if (el.title) return el.title;
+      return el.innerText?.trim() || null;
+    }
+
+    const inputs = Array.from(document.querySelectorAll(
+      'input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+    ));
+
+    const filtered = inputs.filter(el => {
+      const name = getName(el)?.toLowerCase() || "";
+      return /first name|last name|middle|birth|gender|suffix|frequent flyer|state|country/i.test(name);
+    });
+
+    return filtered.map(el => {
+      const rect = el.getBoundingClientRect();
+      const name = getName(el)?.trim();
+      return {
+        tag: el.tagName,
+        type: el.type || null,
+        selector: el.tagName.toLowerCase()
+          + (el.name ? `[name="${el.name}"]` : el.id ? `#${el.id}` : ""),
+        name: name,
+        value: el.value || null,
+        visible: rect.width > 0 && rect.height > 0
+      };
+    });
+    """
+    return ActionResult(js=js)
+
+@custom_controller.action("Filter for DOM indices that are only user-interaction fields, such as typable, focusable, selectable/dropdowns.")
 async def filter_booking_indices() -> ActionResult:
     js = r"""
     const keywords = [
-      "round‑trip","one‑way","depart","return","from","to","search flights",
-      "find flights","continue","next","passenger","date","airport","select","book"
+      "round‑trip", "one‑way", "depart", "return", "from", "to",
+      "search flights", "find flights", "continue", "next",
+      "passenger", "date", "airport", "select", "book"
     ];
 
     const tree = await buildDomTree();
     const nodes = tree.nodes || [];
 
-    // narrow to visible and in booking form
     const matches = nodes.filter(n => {
-      const text = (n.innerText || n.value || n.ariaLabel || "").toLowerCase();
-      return n.visible && keywords.some(k => text.includes(k));
+      if (!n.visible) return false;
+      const t = (n.innerText || n.value || n.ariaLabel || "").toLowerCase();
+      return keywords.some(k => t.includes(k));
     });
 
     return matches.map(n => ({
@@ -140,7 +152,7 @@ async def filter_booking_indices() -> ActionResult:
     """
     return ActionResult(js=js)
 
-@custom_controller.action("Filter for stored indexes in the DOM tree that are only about selecting the appropriate flight, with the appropriate priced selection and navigating through any potential popups.")
+@custom_controller.action("Filter for DOM indices that are only about selecting the appropriate flight, with the appropriate priced selection and navigating through any potential popups.")
 async def filter_flight_selector_indices() -> ActionResult:
     js = r"""
     const tree = await buildDomTree();
@@ -164,7 +176,7 @@ async def filter_flight_selector_indices() -> ActionResult:
     """
     return ActionResult(js=js)
 
-@custom_controller.action("Filter for stored indexes in the DOM tree that are only user-interaction fields, such as typable, focusable, selectable/dropdowns.")
+@custom_controller.action("Filter for DOM indices that are only user-interaction fields, such as typable, focusable, selectable/dropdowns.")
 async def filter_interactive_indices() -> ActionResult:
     js = r"""
     const isInput = el => ["INPUT","SELECT","TEXTAREA"].includes(el.tag);
