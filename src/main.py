@@ -1,29 +1,27 @@
 import asyncio
-import json
 import logging
 import os
 from datetime import datetime
+import time
+from pydantic import BaseModel
 
 from browser_use import Agent
-from browser_use.llm import ChatGoogle
+from browser_use.llm import ChatGoogle, ChatOpenAI
 from dotenv import load_dotenv
-from tqdm import tqdm
+from browser_use import Agent, BrowserSession, Controller, ActionResult
 
-from agent.controller import create_custom_controller
+from agent.controller import custom_controller
 from agent.prompting import get_initial_actions, get_tasks
 from agent.session import create_fresh_browser_session
-
-# from agent.parse_v2 import filter_booking_controls, filter_interactive_fields
-from models.chat import FlightInfo, UserBillingInfo, UserInfo
-
+from models.chat import FlightInfo, UserBillingInfo, UserInfo, UserPreferences
+print("Available custom actions:", list(custom_controller.registry.registry.actions.keys()))
 
 async def do_flight_booking(
     flight_info: FlightInfo,
     user_info_ls: list[UserInfo],
     user_billing_info: UserBillingInfo,
+    user_preferences: UserPreferences = None,
     logs_path: str = "logs",
-    keep_alive: bool = True,
-    max_steps_per_task=30,
 ):
     """Kick off agentic flight booking process.
 
@@ -58,18 +56,13 @@ async def do_flight_booking(
     task2_logs_path = os.path.join(run_logs_path, "task2")
     task3_logs_path = os.path.join(run_logs_path, "task3")
     task4_logs_path = os.path.join(run_logs_path, "task4")
-
-    task1_gif_path = os.path.join(run_logs_path, "task1.gif")
-    task2_gif_path = os.path.join(run_logs_path, "task2.gif")
-    task3_gif_path = os.path.join(run_logs_path, "task3.gif")
-    task4_gif_path = os.path.join(run_logs_path, "task4.gif")
     logging.info(f"Logs will be saved to {run_logs_path}")
 
     # define model to use
-    model = "gemini-2.0-flash"
-    # model = "gpt-4.1-mini"
+    model = "gemini-2.5-flash"
+    #model = 'gpt-4.1-mini'
     llm = ChatGoogle(model=model, temperature=0.0)
-    # llm = ChatOpenAI(model=model, temperature=0)
+    #llm = ChatOpenAI(model=model, temperature=0)
     logging.info(f"Initialized LLM with model {model}")
 
     # generate user tasks for agent
@@ -85,7 +78,7 @@ async def do_flight_booking(
     logging.info(f"TASK #4: FILL IN PAYMENT INFO\n{task4}")
 
     # initialize and kick off chromium browser session
-    browser_session = create_fresh_browser_session(keep_alive=keep_alive)
+    browser_session = create_fresh_browser_session()
     logging.info("Created fresh browser session")
     await browser_session.start()
     logging.info("Browser session initialized")
@@ -95,71 +88,75 @@ async def do_flight_booking(
     <critical_rules>
     You will be interacting with very dense, dynamic pages. Be conservative when using any actions that will alter your view of the page.
     Below is a list of CRITICAL rules that must always be followed. Failure to adhere to them will lead to unstable page interactions that may make accomplishing your goal impossible.
-    1. Before using input_text, ALWAYS double-check that the target element is empty before doing so.
-    2. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
-    3. Whenever you use the scroll action, prefer to scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content. 
-    4. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
+    1. Never click or input text into an element on the page that is obscured or partly obscured. Use the provided screenshot of the page in order to confirm that the target element is fully visible before taking action. If it's obscured, take action to reveal it such as scrolling the page or expanding accordion widgets.
+    2. Whenever you use the scroll action, prefer to scroll in half-page increments (num_pages = 0.5). Scrolling a full page or more can accidentally obscure content. 
+    3. If you are prompted to accept cookies, you must do this before taking any other task. This pop-up may obscure other critical page elements.
     </critical_rules>
     """
 
     # step 1 - Search for flights
     agent = Agent(
-        controller=create_custom_controller(allow_request_assistance=False),
+        controller=custom_controller,
         task=task1,
         llm=llm,
-        initial_actions=get_initial_actions(site="southwest"),
+        initial_actions=get_initial_actions(site="southwest") + [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task1_logs_path,
         use_vision=True,
         extended_system_message=extended_system_message,
-        max_actions_per_step=1,
-        generate_gif=task1_gif_path,
     )
-    await agent.run(max_steps=max_steps_per_task)
+    await agent.run()
 
     # step 2
     agent = Agent(
-        controller=create_custom_controller(allow_request_assistance=False),
+        controller=custom_controller,
         task=task2,
         llm=llm,
-        # initial_actions = [{"filter_booking_controls": {}}],
+        initial_actions = [{"filter_booking_controls": {}}],
         browser_session=browser_session,
         save_conversation_path=task2_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
-        max_actions_per_step=1,
-        generate_gif=task2_gif_path,
     )
-    await agent.run(max_steps=max_steps_per_task)
+    await agent.run()
 
     # step 3
     agent = Agent(
-        controller=create_custom_controller(allow_request_assistance=False),
+        controller=custom_controller,
         task=task3,
         llm=llm,
-        # initial_actions = [{"filter_interactive_fields": {}}],
+        initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task3_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
-        generate_gif=task3_gif_path,
     )
-    await agent.run(max_steps=max_steps_per_task)
+    await agent.run()
 
     # step 4
     agent = Agent(
-        controller=create_custom_controller(allow_request_assistance=True),
+        controller=custom_controller,
         task=task4,
         llm=llm,
-        # initial_actions = [{"filter_interactive_fields": {}}],
+        initial_actions = [{"filter_interactive_fields": {}}],
         browser_session=browser_session,
         save_conversation_path=task4_logs_path,
         use_vision=True,
         extend_system_message=extended_system_message,
-        generate_gif=task4_gif_path,
     )
-    await agent.run(max_steps=max_steps_per_task)
+    await agent.run()
 
+# define demo flight info
+flight_info = {
+  "departure_code": "OAK",
+  "arrival_code": "SAN",
+  "departure_date": "2026-01-09",
+  "return_date": "2026-01-16",
+  "adult_passengers": 1,
+  "cabin_class": "Choice",
+  "routing": "direct",
+  "round_trip": True
+}
 
 # define demo UserInfo
 user_info_ls = [
@@ -192,26 +189,19 @@ user_billing_info = {
 
 
 async def main():
-    for eval_idx in range(1):
-        print("===========================================")
-        print(f"BEGINNING EVALUATION INPUT #{eval_idx}")
-        print("===========================================")
-        with open("src/evaluation/input_samples.jsonl", "r", encoding="utf-8") as f:
-            for idx, line in enumerate(f, 0):
-                if idx == eval_idx:
-                    line = line.strip()
-                    flight_info = json.loads(line)
+    start_time = time.time() # time tracking
+    await do_flight_booking(
+        flight_info=flight_info,
+        user_info_ls=user_info_ls,
+        user_billing_info=user_billing_info,
+    )
+    # end time tracking
+    end_time = time.time()
+    total_seconds = end_time - start_time
+    minutes, seconds = divmod(int(total_seconds), 60)
 
-        for run_idx in tqdm(range(2)):
-            logs_path = f"logs/input_sample_{eval_idx}"
-
-            await do_flight_booking(
-                flight_info=flight_info,
-                user_info_ls=user_info_ls,
-                user_billing_info=user_billing_info,
-                logs_path=logs_path,
-            )
-
+    print(f"Total booking runtime: {minutes} min {seconds} sec")
+    logging.info(f"Total booking runtime: {minutes} min {seconds} sec")
 
 if __name__ == "__main__":
     asyncio.run(main())
