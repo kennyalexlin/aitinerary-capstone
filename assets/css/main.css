@@ -95,7 +95,7 @@ input, select, textarea {
 	}
 
 	body {
-		background: #1b1f22;
+		background: #ffffff;
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -140,29 +140,29 @@ input, select, textarea {
 		}
 
 	body, input, select, textarea {
-		color: #ffffff;
-		font-family: "Source Sans Pro", sans-serif;
+		color: #000000;
+		font-family: "Poppins", sans-serif;
 		font-weight: 300;
 		font-size: 1rem;
 		line-height: 1.65;
 	}
 
-	a {
-		-moz-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		-webkit-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		-ms-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		border-bottom: dotted 1px rgba(255, 255, 255, 0.5);
-		text-decoration: none;
-		color: inherit;
-	}
+			a {
+			-moz-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+			-webkit-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+			-ms-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+			transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+			border-bottom: dotted 1px rgba(0, 0, 0, 0.5);
+			text-decoration: none;
+			color: inherit;
+		}
 
 		a:hover {
 			border-bottom-color: transparent;
 		}
 
 	strong, b {
-		color: #ffffff;
+		color: #000000;
 		font-weight: 600;
 	}
 
@@ -175,7 +175,7 @@ input, select, textarea {
 	}
 
 	h1, h2, h3, h4, h5, h6 {
-		color: #ffffff;
+		color: #000000;
 		font-weight: 600;
 		line-height: 1.5;
 		margin: 0 0 1rem 0;
@@ -189,7 +189,7 @@ input, select, textarea {
 		}
 
 		h1.major, h2.major, h3.major, h4.major, h5.major, h6.major {
-			border-bottom: solid 1px #ffffff;
+			border-bottom: solid 1px #000000;
 			width: -moz-max-content;
 			width: -webkit-max-content;
 			width: -ms-max-content;
@@ -199,8 +199,8 @@ input, select, textarea {
 		}
 
 	h1 {
-		font-size: 2.25rem;
-		line-height: 1.3;
+		font-size: 3.5rem;
+		line-height: 1.2;
 		letter-spacing: 0.5rem;
 	}
 
@@ -229,8 +229,8 @@ input, select, textarea {
 	@media screen and (max-width: 736px) {
 
 		h1 {
-			font-size: 1.75rem;
-			line-height: 1.4;
+			font-size: 2.5rem;
+			line-height: 1.3;
 		}
 
 		h2 {
@@ -1139,10 +1139,7 @@ input, select, textarea {
 			-webkit-transition-delay: 0.75s;
 			-ms-transition-delay: 0.75s;
 			transition-delay: 0.75s;
-			background-image: linear-gradient(to top, rgba(19, 21, 25, 0.5), rgba(19, 21, 25, 0.5)), url("../../images/overlay.png");
-			background-size: auto, 256px 256px;
-			background-position: center, center;
-			background-repeat: no-repeat, repeat;
+			background-color: #ffffff;
 			z-index: 2;
 		}
 
@@ -1155,10 +1152,7 @@ input, select, textarea {
 			-webkit-transition: -webkit-transform 0.325s ease-in-out, -webkit-filter 0.325s ease-in-out;
 			-ms-transition: -ms-transform 0.325s ease-in-out, -ms-filter 0.325s ease-in-out;
 			transition: transform 0.325s ease-in-out, filter 0.325s ease-in-out;
-			background-image: url("../../images/bg.jpg");
-			background-position: center;
-			background-size: cover;
-			background-repeat: no-repeat;
+			background-color: #ffffff;
 			z-index: 1;
 		}
 
@@ -1251,10 +1245,10 @@ input, select, textarea {
 		-webkit-transition: -webkit-transform 0.325s ease-in-out, -webkit-filter 0.325s ease-in-out, opacity 0.325s ease-in-out;
 		-ms-transition: -ms-transform 0.325s ease-in-out, -ms-filter 0.325s ease-in-out, opacity 0.325s ease-in-out;
 		transition: transform 0.325s ease-in-out, filter 0.325s ease-in-out, opacity 0.325s ease-in-out;
-		background-image: -moz-radial-gradient(rgba(0, 0, 0, 0.25) 25%, rgba(0, 0, 0, 0) 55%);
-		background-image: -webkit-radial-gradient(rgba(0, 0, 0, 0.25) 25%, rgba(0, 0, 0, 0) 55%);
-		background-image: -ms-radial-gradient(rgba(0, 0, 0, 0.25) 25%, rgba(0, 0, 0, 0) 55%);
-		background-image: radial-gradient(rgba(0, 0, 0, 0.25) 25%, rgba(0, 0, 0, 0) 55%);
+		background-image: -moz-radial-gradient(rgba(219, 236, 255, 0.6) 40%, rgba(219, 236, 255, 0) 80%);
+		background-image: -webkit-radial-gradient(rgba(219, 236, 255, 0.6) 40%, rgba(219, 236, 255, 0) 80%);
+		background-image: -ms-radial-gradient(rgba(219, 236, 255, 0.6) 40%, rgba(219, 236, 255, 0) 80%);
+		background-image: radial-gradient(rgba(219, 236, 255, 0.6) 40%, rgba(219, 236, 255, 0) 80%);
 		max-width: 100%;
 		text-align: center;
 	}
@@ -1288,16 +1282,8 @@ input, select, textarea {
 			}
 
 		#header .logo {
-			width: 5.5rem;
-			height: 5.5rem;
-			line-height: 5.5rem;
-			border: solid 1px #ffffff;
-			border-radius: 100%;
+			display: none;
 		}
-
-			#header .logo .icon:before {
-				font-size: 2rem;
-			}
 
 		#header .content {
 			border-style: solid;
@@ -1325,6 +1311,13 @@ input, select, textarea {
 					margin-bottom: 0;
 				}
 
+			#header .content .logo-image {
+				max-width: 500px;
+				width: 100%;
+				height: auto;
+				margin-bottom: 1rem;
+			}
+
 			#header .content p {
 				text-transform: uppercase;
 				letter-spacing: 0.2rem;
@@ -1340,13 +1333,13 @@ input, select, textarea {
 			margin-bottom: 0;
 			list-style: none;
 			padding-left: 0;
-			border: solid 1px #ffffff;
+			border: solid 1px #000000;
 			border-radius: 4px;
 		}
 
 			#header nav ul li {
 				padding-left: 0;
-				border-left: solid 1px #ffffff;
+				border-left: solid 1px #000000;
 			}
 
 				#header nav ul li:first-child {
@@ -1366,11 +1359,11 @@ input, select, textarea {
 				}
 
 					#header nav ul li a:hover {
-						background-color: rgba(255, 255, 255, 0.075);
+						background-color: rgba(0, 0, 0, 0.075);
 					}
 
 					#header nav ul li a:active {
-						background-color: rgba(255, 255, 255, 0.175);
+						background-color: rgba(0, 0, 0, 0.175);
 					}
 
 		#header nav.use-middle:after {
@@ -1381,7 +1374,7 @@ input, select, textarea {
 			left: calc(50% - 1px);
 			width: 1px;
 			height: 100%;
-			background: #ffffff;
+			background: #000000;
 		}
 
 		#header nav.use-middle ul li.is-middle {
@@ -1451,6 +1444,10 @@ input, select, textarea {
 				padding: 2.5rem 1rem;
 			}
 
+			#header .content .logo-image {
+				max-width: 400px;
+			}
+
 			#header .content p {
 				line-height: 1.875;
 			}
@@ -1465,6 +1462,10 @@ input, select, textarea {
 
 				#header .content .inner {
 					padding: 2.5rem 0;
+				}
+
+				#header .content .logo-image {
+					max-width: 350px;
 				}
 
 				#header nav ul {
@@ -1539,11 +1540,11 @@ input, select, textarea {
 			-webkit-transition: opacity 0.325s ease-in-out, -webkit-transform 0.325s ease-in-out;
 			-ms-transition: opacity 0.325s ease-in-out, -ms-transform 0.325s ease-in-out;
 			transition: opacity 0.325s ease-in-out, transform 0.325s ease-in-out;
-			padding: 4.5rem 2.5rem 1.5rem 2.5rem ;
+			padding: 4.5rem 3rem 1.5rem 3rem ;
 			position: relative;
-			width: 40rem;
-			max-width: 100%;
-			background-color: rgba(27, 31, 34, 0.85);
+			width: 80rem;
+			max-width: 90%;
+			background-color: #f5f5f5;
 			border-radius: 4px;
 			opacity: 0;
 		}
@@ -1656,3 +1657,32 @@ input, select, textarea {
 		body.is-preload #footer {
 			opacity: 0;
 		}
+
+	/* Main heading styling for aitinerary */
+			#header .content .inner h1 {
+		font-family: "Poppins", sans-serif;
+		text-transform: lowercase;
+		font-weight: 600;
+		letter-spacing: 0.3rem;
+		color: #000000;
+	}
+
+	/* How It Works section spacing adjustments */
+	#howitworks p {
+		margin-bottom: 1em;
+	}
+
+	#howitworks ul {
+		margin-top: 0.5em;
+		margin-bottom: 1.5em;
+	}
+
+	#howitworks h3 {
+		margin-top: 2em;
+		margin-bottom: 0.8em;
+	}
+
+	#howitworks h3:first-child {
+		margin-top: 0;
+	}
+

@@ -9,6 +9,9 @@
 		<title>Dimension by HTML5 UP</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 	</head>
@@ -24,8 +27,7 @@
 						</div>
 						<div class="content">
 							<div class="inner">
-								<h1>aitinerary</h1>
-								<p>travel your way</p>
+								<img src="images/logo.png" alt="aitinerary" class="logo-image" />
 							</div>
 						</div>
 						<nav>
@@ -33,6 +35,7 @@
 								<li><a href="#about">About</a></li>
 								<li><a href="#demo">Demo</a></li>
 								<li><a href="#howitworks">How It Works</a></li>
+								<li><a href="#performance">Performance</a></li>
 								<li><a href="#team">Team</a></li>
 								<!--<li><a href="#elements">Elements</a></li>-->
 							</ul>
@@ -46,24 +49,19 @@
 							<article id="about">
 								<h2 class="major">About</h2>
 								<!-- <span class="image main"><img src="images/pic01.jpg" alt="" /></span> -->
-								<p>Planning and booking a trip can be tedious and time-consuming. Travelers often juggle multiple websites just to find and book flights, 
-									hotels, and activities—re-entering the same information over and over. The process is fragmented, repetitive, and prone to error, 
-									especially when coordinating preferences and timing across a full itinerary.</p>
+								<p>Planning and booking a trip can be tedious and time-consuming. Travelers often juggle multiple websites just to find and book flights, hotels, and activities—re-entering the same information over and over. The process is fragmented, repetitive, and prone to error, especially when coordinating preferences and timing across a full itinerary.</p>
 								
-								<p>We set out to simplify this experience by reimagining what travel planning could look like if it felt more like talking to a smart, 
-									capable assistant—one that understands your intent, fills in the gaps, and handles the logistics.</p>
+								<p>We set out to simplify this experience by reimagining what travel planning could look like if it felt more like talking to a smart, capable assistant—one that understands your intent, fills in the gaps, and handles the logistics.</p>
 
-								<p>aitinerary uses large language models (LLMs) to interpret open-ended travel requests and extract structured details like dates, destinations, 
-									and preferences. These are mapped into clean, validated formats that power downstream automation. Once an itinerary is finalized, 
-									the system can generate booking-ready links or payloads that plug directly into flight, hotel, and activity platforms—turning plans into 
-									action, automatically.</p>
+								<p>aitinerary uses large language models (LLMs) to interpret open-ended travel requests and extract structured details like dates, destinations, and preferences. These are mapped into clean, validated formats that power downstream automation. Once an itinerary is finalized, the system hands it off to an automated agent that navigates real booking websites on the user's behalf—filling out forms, selecting options, and completing the booking process end-to-end.</p>
 							</article>
 
 						<!-- Demo -->
 							<article id="demo">
 								<h2 class="major">Demo</h2>
-								<p>Planning a trip can feel overwhelming. In this demo, we show how aitinerary turns a simple conversation into a complete travel 
-									plan. No tabs, no spreadsheets, no stress. </p>
+								<p>Think out loud—we’ll handle the details. AItinerary makes planning feel effortless, from idea to itinerary. </p>
+
+								<p>In this demo, we show how aitinerary turns a simple conversation into a complete travel plan. </p>
 
 								<span class="image main"><img src="images/pic02.jpg" alt="" /></span>
 
@@ -72,8 +70,60 @@
 						<!-- How It Works -->
 							<article id="howitworks">
 								<h2 class="major">How It Works</h2>
+
+									<h3>1. Conversational Input Engine</h3>
+									<p>Each user message flows through a structured multi-step LLM pipeline designed for stateful, multi-turn interactions:</p>
+									
+									<ul>
+										<li><strong>Entity extraction</strong> identifies structured fields like departure city, destination, dates, budget, cabin class, and preferences.</li>
+										<li><strong>Context summarization</strong> condenses the full conversation history—both user and assistant messages—into a compact snapshot of intent and progress.</li>
+										<li><strong>Assistant reply generation</strong> produces a context-aware response based on the latest extracted fields and conversational context.</li>
+									</ul>
+
+									<p>We use predefined data models such as <code>FlightInfo</code>, <code>UserInfo</code>, and <code>Preferences</code> to define what variables are required for automation and to store extracted values. These models are incrementally updated across turns, enabling partial inputs to build into a complete travel plan over time. They also serve as contracts between system components, ensuring clean, validated JSON is passed downstream—eliminating ambiguity and making automated execution reliable.</p>
+
+									<p>To handle typical inconsistencies in LLM outputs, we implemented lightweight post-processing modules, such as:</p>
+									
+									<ul>
+										<li><strong>Date correction</strong>, which updates ambiguous or outdated year values based on the current date.</li>
+										<li><strong>Airport resolution</strong>, which maps city names to IATA codes using a local airport database and prioritizes large international hubs when multiple matches exist.</li>
+									</ul>
+
+									<h3>2. Automated Booking Agent</h3>
+									<p>Once the travel plan is complete and validated, it is passed to our custom web automation agent built on the open-source <a href="https://browser-use.com/" target="_blank">browser-use</a> framework. This agent simulates human-like navigation on real booking websites—filling in forms, selecting flights, and completing checkout steps.</p>
+
+									<p>To handle the challenges of dense, dynamic booking UIs, we extended the base framework with:</p>
+									
+									<ul>
+										<li><strong>Custom functions</strong> to manage edge cases like pop-up overlays, dropdown menus, and manual handoffs for sensitive input (e.g., payment fields).</li>
+										<li><strong>Task-based segmentation</strong>, splitting the booking flow into discrete subtasks (e.g., search, selection, checkout) to reduce cognitive overhead and improve model focus.</li>
+										<li><strong>DOM parsing and heuristics</strong> to prioritize actionable elements—such as buttons labeled "Search" or "Continue"—and match form fields using metadata like labels, placeholders, and accessibility tags.</li>
+									</ul>
+
+									<p>This enables reliable, scalable automation of bookings across real-world websites without relying on brittle, site-specific templates.</p>
+
+									<h3>3. Persistent Data Layer</h3>
+									<p>Our backend supports a robust data storage and personalization layer, including:</p>
+									
+									<ul>
+										<li><strong>User profiles</strong>, storing onboarding information like name, passport number, and travel preferences.</li>
+										<li><strong>Session memory</strong>, tying all assistant interactions and updates to a unique session ID.</li>
+									</ul>
+
+									<p>This enables:</p>
+									
+									<ul>
+										<li><strong>Pre-filled fields and reduced user input</strong> during booking</li>
+										<li><strong>Conversation continuity</strong>, allowing users to pause and resume planning</li>
+										<li><strong>Long-term personalization</strong>, using past interactions to improve future suggestions and tailor the assistant experience over time.</li>
+									</ul>
+							</article>
+						
+						<!-- Performance -->
+							<article id="performance">
+								<h2 class="major">Performance</h2>
 								<!-- <span class="image main"><img src="images/pic03.jpg" alt="" /></span> -->
-								<p>short technical description</p>
+								<p>evaluation + figures</p>
 							</article>
 						
 						<!-- Team -->
