@@ -59,11 +59,20 @@
 						<!-- Demo -->
 							<article id="demo">
 								<h2 class="major">Demo</h2>
-								<p>Think out loud—we’ll handle the details. AItinerary makes planning feel effortless, from idea to itinerary. </p>
-
+								<p>Think out loud—we’ll handle the details. AItinerary makes planning feel effortless, from idea to itinerary.</p>
 								<p>In this demo, we show how aitinerary turns a simple conversation into a complete travel plan. </p>
 
-								<span class="image main"><img src="images/pic02.jpg" alt="" /></span>
+							<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin-top: 1.5em;">
+								<iframe
+								src="https://www.youtube.com/embed/arpdfwQ2pWI"
+								title="AItinerary Demo"
+								frameborder="0"
+								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+								allowfullscreen
+								style="position: absolute; top: 0; left: 0; width: 90%; height: 90%; border-radius: 8px;"
+								></iframe>
+							</div>
+							</article>
 
 							</article>
 
@@ -72,13 +81,29 @@
 								<h2 class="major">How It Works</h2>
 
 									<h3>1. Conversational Input Engine</h3>
-									<p>Each user message flows through a structured multi-step LLM pipeline designed for stateful, multi-turn interactions:</p>
 									
-									<ul>
+									<div style="display: flex; align-items: center; justify-content: space-between; gap: 2em; flex-wrap: wrap; margin-bottom: 2em;">
+
+									<!-- Text Block -->
+									<div style="flex: 1; min-width: 250px;">
+										<p>Each user message flows through a structured multi-step LLM pipeline designed for stateful, multi-turn interactions:</p>
+										<ul>
 										<li><strong>Entity extraction</strong> identifies structured fields like departure city, destination, dates, budget, cabin class, and preferences.</li>
 										<li><strong>Context summarization</strong> condenses the full conversation history—both user and assistant messages—into a compact snapshot of intent and progress.</li>
 										<li><strong>Assistant reply generation</strong> produces a context-aware response based on the latest extracted fields and conversational context.</li>
-									</ul>
+										</ul>
+									</div>
+
+									<!-- Image + Caption -->
+									<figure style="flex: 0 0 40%; text-align: center; margin: 0;">
+										<img src="images/input_architecture.png" alt="Conversational Input Engine Architecture"
+											style="width: 100%; height: auto; border-radius: 8px;" />
+										<figcaption style="margin-top: 0.5em; font-style: italic; font-size: 0.9em;">
+										Conversational Input Engine Architecture
+										</figcaption>
+									</figure>
+
+									</div>
 
 									<p>We use predefined data models such as <code>FlightInfo</code>, <code>UserInfo</code>, and <code>Preferences</code> to define what variables are required for automation and to store extracted values. These models are incrementally updated across turns, enabling partial inputs to build into a complete travel plan over time. They also serve as contracts between system components, ensuring clean, validated JSON is passed downstream—eliminating ambiguity and making automated execution reliable.</p>
 
@@ -99,6 +124,14 @@
 										<li><strong>Task-based segmentation</strong>, splitting the booking flow into discrete subtasks (e.g., search, selection, checkout) to reduce cognitive overhead and improve model focus.</li>
 										<li><strong>DOM parsing and heuristics</strong> to prioritize actionable elements—such as buttons labeled "Search" or "Continue"—and match form fields using metadata like labels, placeholders, and accessibility tags.</li>
 									</ul>
+
+									<div style="text-align: center; margin: 2em 0;">
+									<img src="images/dom_parsing_architecture.png" alt="DOM Parsing Architecture"
+										style="max-width: 50%; height: auto; border-radius: 8px;" />
+										<figcaption style="margin-top: 0.5em; font-style: italic; font-size: 0.9em;">
+										DOM Parsing Architecture
+										</figcaption>
+									</div>
 
 									<p>This enables reliable, scalable automation of bookings across real-world websites without relying on brittle, site-specific templates.</p>
 
@@ -122,16 +155,133 @@
 						<!-- Performance -->
 							<article id="performance">
 								<h2 class="major">Performance</h2>
-								<!-- <span class="image main"><img src="images/pic03.jpg" alt="" /></span> -->
-								<p>evaluation + figures</p>
-							</article>
+									<p>
+										Evaluation of the system was performed on the <strong>input</strong> and <strong>browser use</strong> aspects separately.
+										Although we ideally wanted to test the system end-to-end, time constraints prevented us from fully integrating both components.
+									</p>
+
+									<h3>Input Testing</h3>
+									<p>
+										We began with manual testing to assess system performance and data extraction fidelity, using a variety of LLMs. This was followed by automated testing using a second LLM as a simulated user, allowing us to evaluate the system at scale.
+									</p>
+									<p>
+										We created a ground truth dataset of 100 trips in JSON format and defined four distinct user personas:
+									</p>
+
+									<ul>
+										<li><strong>Comprehensive:</strong> Provides all required information in one message.</li>
+										<li><strong>Direct simple:</strong> Provides one piece of information at a time, when prompted.</li>
+										<li><strong>Error prone:</strong> Enters information incorrectly, then self-corrects.</li>
+										<li><strong>Ambiguous:</strong> Provides vague input and clarifies when asked.</li>
+									</ul>
+
+									<p>
+										The simulated user was fed one of these personas and a trip from the dataset. It engaged in a back-and-forth conversation with the system until either all required fields were extracted or the conversation reached the 30-message limit.
+									</p>
+									
+									<figure style="float: right; width: 40%; margin-left: 1.5em; margin-bottom: 1.5em; text-align: center;">
+									<img src="images/performance_input.png" alt="Performance metrics for input testing"
+										style="width: 100%; height: auto; border-radius: 8px;" />
+									<figcaption style="margin-top: 0.5em; font-style: italic; font-size: 0.9em;">
+										Figure 1: Overall metrics for input
+									</figcaption>
+									</figure>
+
+									<p>
+										We compared the system’s extracted fields to the ground truth, evaluating metrics such as:
+									</p>
+									
+
+									<ul>
+										<li><strong>Dialogue completion rate</strong></li>
+										<li><strong>Overall success rate</strong> (all required fields extracted without error)</li>
+										<li><strong>Slot-filling precision, recall, and F1-score</strong></li>
+									</ul>
+
+									<p>
+										We tested 400 combinations of trips and personas. The system achieved an <strong>overall success rate of 91%</strong>.
+									</p>
+									
+									<hr />
+
+									<h3>Browser Use Testing</h3>
+
+									<p>
+										We tested the browser automation agent manually across curated trips. Ten unique trips were run through the system three times each:
+									</p>
+
+									<ol>
+										<li>Once <strong>without</strong> DOM improvements</li>
+										<li>Twice <strong>with</strong> DOM improvements</li>
+									</ol>
+
+									<p>
+										Logs were collected and analyzed after each run. The key metric was <strong>end-to-end success</strong>, defined as the agent completing all four tasks without user aid:
+									</p>
+
+									<ul>
+										<li>Flight details page navigation</li>
+										<li>Flight selection</li>
+										<li>Form filling for personal details</li>
+										<li>Progression through booking steps</li>
+									</ul>
+									
+									<figure style="float: right; width: 40%; margin-left: 1.5em; margin-bottom: 1.5em; text-align: center;">
+									<img src="images/performance_browser_use.png" alt="Performance metrics for browser agent"
+										style="width: 100%; height: auto; border-radius: 8px;" />
+									<figcaption style="margin-top: 0.5em; font-style: italic; font-size: 0.9em;">
+										Figure 2: Browser agent performance comparison 
+									</figcaption>
+									</figure>
+
+									<p>
+										We also tracked total token usage, time per run, and cost. Without DOM improvements, the system achieved <strong>44%</strong> success. With DOM improvements, it reached <strong>100%</strong>.
+									</p>
+									
+									<p>
+										Two key limitations of our evaluation process were:
+									</p>
+
+									<ul>
+										<li><strong>Cost:</strong> $0.62–$2.50 per run</li>
+										<li><strong>Time:</strong> Up to 16 minutes per test</li>
+									</ul>
+
+									</article>
 						
 						<!-- Team -->
 						 	<article id="team">
 								<h2 class="major">Team</h2>
 								<!-- <span class="image main"><img src="images/pic03.jpg" alt="" /></span> -->
 								 <p>UC Berkeley Masters of Information and Data Science Capstone Project</p>
-								<p>team members and short text</p>
+
+								<div class="team-grid">
+									<!-- Row of 3 -->
+									<div class="team-member">
+									<img src="images/chan.png" alt="member_joseph">
+									<p>Joseph Chan</p>
+									</div>
+									<div class="team-member">
+									<img src="images/gardner.png" alt="member_henry">
+									<p>Henry Gardner</p>
+									</div>
+									<div class="team-member">
+									<img src="images/lin.png" alt="member_kenneth">
+									<p>Kenneth Lin</p>
+									</div>
+
+									<!-- Row of 2 -->
+									<div class="team-member">
+									<img src="images/liu.png" alt="member_michelle">
+									<p>Michelle Liu</p>
+									</div>
+									<div class="team-member">
+									<img src="images/xu.png" alt="member_jim">
+									<p>Jim Xu</p>
+									</div>
+								</div>
+								</article>
+
 							</article>
 
 						<!-- Contact -->

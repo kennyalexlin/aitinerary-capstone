@@ -1686,3 +1686,38 @@ input, select, textarea {
 		margin-top: 0;
 	}
 
+	/* team section adjustments */
+
+	#team .team-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 2em;
+	margin-top: 2em;
+	}
+
+	.team-grid {
+		border: 2px solid red; /* Temporary for testing */
+		}
+	.team-member {
+	text-align: center;
+	width: 150px;
+	}
+
+	.team-member img {
+	width: 120px;
+	height: 120px;
+	object-fit: cover;
+	border-radius: 50%;
+	border: 3px solid #ccc;
+	transition: transform 0.3s;
+	}
+
+	.team-member img:hover {
+	transform: scale(1.05);
+	}
+
+	.team-member p {
+	margin-top: 0.5em;
+	font-weight: 600;
+	}
