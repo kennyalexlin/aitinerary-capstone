@@ -1696,9 +1696,6 @@ input, select, textarea {
 	margin-top: 2em;
 	}
 
-	.team-grid {
-		border: 2px solid red; /* Temporary for testing */
-		}
 	.team-member {
 	text-align: center;
 	width: 150px;
@@ -1721,3 +1718,5 @@ input, select, textarea {
 	margin-top: 0.5em;
 	font-weight: 600;
 	}
+
+
